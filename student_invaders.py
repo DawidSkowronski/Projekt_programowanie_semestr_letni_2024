@@ -18,14 +18,14 @@ class Byt:
 class Gracz(Byt):
     """Klasa zawierająca funkcjonalność i anatomię gracza."""
     szer = OKNO_SZER//12
-    wys = szer
+    wys = szer * 3/4
     kolor = (255, 255, 255)
     speed = 15
     dx = 0
     dy = 0
 
-    def __init__(self, x, y, hp):
-        Byt.__init__(self, x, y, hp)
+    def __init__(self, hp):
+        Byt.__init__(self, 0, 0, hp)
 
     def rysujGracza(self, okienko):
         """Rysuje instancję gracza."""
@@ -50,6 +50,7 @@ class Gracz(Byt):
         else:
             self.dx = 0
         
+        # GRACZ NIE MOŻE WYJŚĆ ZA OKIENKO
         if self.x <= 0:
             if self.dx < 0:
                 self.x = 0
@@ -81,7 +82,8 @@ class Gracz(Byt):
         self.x = x
         self.y = y
 
-gracz = Gracz(100, 500, 100)
+gracz = Gracz(100)
+gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 
 # KLASA PRZECIWNIK
 class Przeciwnik(Byt):
