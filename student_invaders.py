@@ -90,7 +90,7 @@ class Przeciwnik(Byt):
     szer = OKNO_SZER//12
     wys = szer * 3/4
     kolor = (255, 255, 255)
-    speed = 4
+    speed = 2
     dx = 0
     dy = 0
 
@@ -104,12 +104,14 @@ class Przeciwnik(Byt):
 
     def ruchPrzeciwnika(self):
         self.dy=self.speed
+        przeciwnik_czekaj = 1000
+        
 
         if self.y <= OKNO_WYS*2//3:
             if self.dy < 0:
                 self.y = OKNO_WYS*2//3
             else:
-                pygame.time.set_timer(100,millis)
+                pygame.time.set_timer(zdarzenie_pozycja_przeciwnika, przeciwnik_czekaj)
                 self.y += self.dy
 
 
@@ -125,7 +127,7 @@ gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 
 przeciwnik = Przeciwnik(100)
 przeciwnik.ustawPrzeciwnika((OKNO_SZER - gracz.szer)//2, 0 )
-
+zdarzenie_pozycja_przeciwnika = pygame.USEREVENT
 
 # GRA
 pygame.init()
@@ -139,6 +141,8 @@ while graj:
     for zdarzenie in pygame.event.get():
         if zdarzenie.type == pygame.QUIT:
             graj = False
+        #elif zdarzenie.type == zdarzenie_pozycja_przeciwnika:
+            przeciwnik.ruchPrzeciwnika(10)
     keys = pygame.key.get_pressed()
 
     okienko.fill(TŁO)
