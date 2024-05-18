@@ -11,6 +11,7 @@ wrogie statki
 -> ruch (w dół), strzał z działa (być może poprzedzony jakąś animacją) 
 * wrogowie mogą mieć różne kolory, np. czerwony przeciwnik jest wrażliwy jednynie na czerwone pociski, zielony - na zielone
 * gdy statek znajdzie się w pobliżu gracza to robi kamikaze, jeśli trafi w barierę to uszkadza ją.
+* typ przciwnika zależny od modulo danej liczby, inaczej, mocniejszy przeciwnik tworzy się co modulo 5
 
 bariery (na dole mapy)
 -> blokuj pocisk przeciwnika
