@@ -1,5 +1,8 @@
 import pygame
 import time
+import random
+
+pygame.init()
 
 # GLOBALNE STAŁE
 OKNO_SZER = 1200
@@ -10,10 +13,9 @@ TŁO = (0, 25, 15)
 # KLASA BYTU
 class Byt:
     """Klasa tworząca byt w grze."""
-    def __init__(self, x, y, hp):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.hp = hp
 
 # KLASA GRACZ
 class Gracz(Byt):
@@ -25,8 +27,8 @@ class Gracz(Byt):
     dx = 0   
     dy = 0
 
-    def __init__(self, hp):
-        Byt.__init__(self, 0, 0, hp)
+    def __init__(self):
+        Byt.__init__(self, 0, 0)
 
     def rysujGracza(self, okienko):
         """Rysuje instancję gracza."""
@@ -52,7 +54,8 @@ class Gracz(Byt):
             self.dx = 0
         
         # GRACZ NIE MOŻE WYJŚĆ ZA OKIENKO
-        if self.x <= 0:
+        # NIE MOŻE WYJŚĆ Z LEWEJ ANI Z PRAWEJ
+        if self.x <= 0:                                 
             if self.dx < 0:
                 self.x = 0
             else:
@@ -65,7 +68,8 @@ class Gracz(Byt):
         else:
             self.x += self.dx
 
-        if self.y <= OKNO_WYS*2//3:
+        # NIE MOŻE WYJŚĆ Z GÓRY ANI Z DOŁU
+        if self.y <= OKNO_WYS*2//3:                     
             if self.dy < 0:
                 self.y = OKNO_WYS*2//3
             else:
@@ -87,62 +91,71 @@ class Gracz(Byt):
 
 # KLASA PRZECIWNIK
 class Przeciwnik(Byt):
+    stworzonychPrzeciwników = 0
+
     szer = OKNO_SZER//12
     wys = szer * 3/4
-    kolor = (255, 255, 255)
-    speed = 2
+    kolor = (255, 0, 0)
     dx = 0
     dy = 0
 
-    def __init__(self, hp):
-        Byt.__init__(self, 0, 0, hp)
+    def __init__(self):
+        Byt.__init__(self, 0, 0)
+
+        self.speed = 1
+
+        self.id = Przeciwnik.stworzonychPrzeciwników
+        Przeciwnik.stworzonychPrzeciwników += 1
     
     def rysujPrzeciwnika(self, okienko):
+        """Rysuje instancję przeciwnika."""
         self.przeciwnik = pygame.Rect(self.x, self.y, self.szer, self.wys)
 
         pygame.draw.rect(okienko, self.kolor, self.przeciwnik)
 
     def ruchPrzeciwnika(self):
-        self.dy=self.speed
-        przeciwnik_czekaj = 1000
-        
+        """Zmienia koordynaty przeciwnika."""
+        self.dy = self.speed
 
-        if self.y <= OKNO_WYS*2//3:
-            if self.dy < 0:
-                self.y = OKNO_WYS*2//3
-            else:
-                pygame.time.set_timer(zdarzenie_pozycja_przeciwnika, przeciwnik_czekaj)
-                self.y += self.dy
+        self.y += self.dy
 
-
-    def ustawPrzeciwnika(self, x, y):
+    def ustawPrzeciwnika(self, x = 0, y = 0):
         """Ustawia przeciwnika na konkretne koordynaty."""
         self.x = x
         self.y = y
 
-#DODAWANIE OBIEKTÓW
-
-gracz = Gracz(100)
+# DODAWANIE OBIEKTÓW
+# ustawiamy gracza na środku ekranu przy dole
+gracz = Gracz()
 gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 
-przeciwnik = Przeciwnik(100)
-przeciwnik.ustawPrzeciwnika((OKNO_SZER - gracz.szer)//2, 0 )
-zdarzenie_pozycja_przeciwnika = pygame.USEREVENT
+# TIMER
+# pojawia przeciwnika co jakiś czas
+cykl_pojawienia_przeciwnika = 3000      # ms
+pojaw_przeciwnika = pygame.USEREVENT
+pygame.time.set_timer(pojaw_przeciwnika, cykl_pojawienia_przeciwnika)
 
-# GRA
-pygame.init()
+#
+#    GRA
+#
 
 okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
 pygame.display.set_caption("Student Invaders")
 zegarek = pygame.time.Clock()
+
+# lista przeciwników
+enemyList = list[Przeciwnik]()
 
 graj = True
 while graj:
     for zdarzenie in pygame.event.get():
         if zdarzenie.type == pygame.QUIT:
             graj = False
-        #elif zdarzenie.type == zdarzenie_pozycja_przeciwnika:
-            przeciwnik.ruchPrzeciwnika(10)
+        if zdarzenie.type == pojaw_przeciwnika:
+            przeciwnik = Przeciwnik()
+            przeciwnik.ustawPrzeciwnika(random.randint(0, OKNO_SZER - przeciwnik.szer), - przeciwnik.wys - 2)
+            enemyList.append(przeciwnik)
+
     keys = pygame.key.get_pressed()
 
     okienko.fill(TŁO)
@@ -151,8 +164,9 @@ while graj:
     gracz.przesuńGracza(keys)
     gracz.rysujGracza(okienko)
 
-    przeciwnik.ruchPrzeciwnika()
-    przeciwnik.rysujPrzeciwnika(okienko)
+    for enemy in enemyList:
+        enemy.rysujPrzeciwnika(okienko)
+        enemy.ruchPrzeciwnika()
 
     pygame.display.update()
     zegarek.tick(FPS)
