@@ -10,7 +10,7 @@ statek gracza
 wrogie statki 
 -> ruch (w dół), strzał z działa (być może poprzedzony jakąś animacją) 
 * wrogowie mogą mieć różne kolory, np. czerwony przeciwnik jest wrażliwy jednynie na czerwone pociski, zielony - na zielone
-* można też 
+* gdy statek znajdzie się w pobliżu gracza to robi kamikaze, jeśli trafi w barierę to uszkadza ją.
 
 bariery (na dole mapy)
 -> blokuj pocisk przeciwnika
@@ -55,5 +55,6 @@ poziomy
 
 
 
-
+HISTORIA (kiczowata jak się da)
+-zły Cauchy chce zmienić Epsilon na ujemny we wszystkich twierdzeniach. Przez co cała matematyka ległaby w gruzach. Na szczęście drużyna inżynierów ..., przyszłych inżynierów postanawia dołączyć się do defensywy. Niestety, stwierdzili że PI to około 3, przez co systemy nawigacyjne ich statku zostały źle skalibrowane i ruszyli sami na całą armię obcych.
 

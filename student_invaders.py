@@ -1,8 +1,9 @@
 import pygame
+import time
 
 # GLOBALNE STAŁE
 OKNO_SZER = 1200
-OKNO_WYS = 900
+OKNO_WYS = 700
 FPS = 60
 TŁO = (0, 25, 15)
 
@@ -20,8 +21,8 @@ class Gracz(Byt):
     szer = OKNO_SZER//12
     wys = szer * 3/4
     kolor = (255, 255, 255)
-    speed = 15
-    dx = 0
+    speed = 8
+    dx = 0   
     dy = 0
 
     def __init__(self, hp):
@@ -64,9 +65,9 @@ class Gracz(Byt):
         else:
             self.x += self.dx
 
-        if self.y <= 0:
+        if self.y <= OKNO_WYS*2//3:
             if self.dy < 0:
-                self.y = 0
+                self.y = OKNO_WYS*2//3
             else:
                 self.y += self.dy
         elif self.y >= OKNO_WYS - self.wys:
@@ -82,12 +83,49 @@ class Gracz(Byt):
         self.x = x
         self.y = y
 
-gracz = Gracz(100)
-gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
+
 
 # KLASA PRZECIWNIK
 class Przeciwnik(Byt):
-    pass
+    szer = OKNO_SZER//12
+    wys = szer * 3/4
+    kolor = (255, 255, 255)
+    speed = 4
+    dx = 0
+    dy = 0
+
+    def __init__(self, hp):
+        Byt.__init__(self, 0, 0, hp)
+    
+    def rysujPrzeciwnika(self, okienko):
+        self.przeciwnik = pygame.Rect(self.x, self.y, self.szer, self.wys)
+
+        pygame.draw.rect(okienko, self.kolor, self.przeciwnik)
+
+    def ruchPrzeciwnika(self):
+        self.dy=self.speed
+
+        if self.y <= OKNO_WYS*2//3:
+            if self.dy < 0:
+                self.y = OKNO_WYS*2//3
+            else:
+                pygame.time.set_timer(100,millis)
+                self.y += self.dy
+
+
+    def ustawPrzeciwnika(self, x, y):
+        """Ustawia przeciwnika na konkretne koordynaty."""
+        self.x = x
+        self.y = y
+
+#DODAWANIE OBIEKTÓW
+
+gracz = Gracz(100)
+gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
+
+przeciwnik = Przeciwnik(100)
+przeciwnik.ustawPrzeciwnika((OKNO_SZER - gracz.szer)//2, 0 )
+
 
 # GRA
 pygame.init()
@@ -108,7 +146,10 @@ while graj:
     # WYKONUJE SIĘ NA KAŻDY TICK
     gracz.przesuńGracza(keys)
     gracz.rysujGracza(okienko)
-    
+
+    przeciwnik.ruchPrzeciwnika()
+    przeciwnik.rysujPrzeciwnika(okienko)
+
     pygame.display.update()
     zegarek.tick(FPS)
 
