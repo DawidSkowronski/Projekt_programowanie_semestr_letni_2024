@@ -124,6 +124,34 @@ class Przeciwnik(Byt):
         self.x = x
         self.y = y
 
+# KLASA POCISK
+class Pocisk():
+    #szer = OKNO_SZER//12
+    #wys = szer * 3/4
+    kolor = (255, 255, 255)
+    dx = 0   
+    dy = 0
+    def __init__(self):
+        self.speed = 3
+        self.szer = OKNO_SZER//30
+        self.wys = szer * 3/5
+    
+    def rysujPocisk(self, okienko):
+        """Rysuje pocisk."""
+        
+    def ustawPocisk(self, x, y):
+            self.x = x
+            self.y = y
+            
+    def wystrzelPocisk(self, keys):
+        """Przypisanie wystrzału do klawisza."""
+        if keys[pygame.K_SPACE]:
+
+
+    
+
+        
+
 # DODAWANIE OBIEKTÓW
 # ustawiamy gracza na środku ekranu przy dole
 gracz = Gracz()
