@@ -8,7 +8,9 @@ pygame.init()
 OKNO_SZER = 1200
 OKNO_WYS = 700
 FPS = 60
-TŁO = (0, 25, 15)
+TŁO = pygame.image.load("kosmos.png")
+statek = pygame.image.load("statek.png")
+wróg = pygame.image.load("kosmita.png")
 
 # KLASA BYTU
 class Byt:
@@ -20,9 +22,8 @@ class Byt:
 # KLASA GRACZ
 class Gracz(Byt):
     """Klasa zawierająca funkcjonalność i anatomię gracza."""
-    szer = OKNO_SZER//12
-    wys = szer * 3/4
-    kolor = (255, 255, 255)
+    szer = 115
+    wys = 132
     speed = 8
     dx = 0   
     dy = 0
@@ -32,10 +33,8 @@ class Gracz(Byt):
 
     def rysujGracza(self, okienko):
         """Rysuje instancję gracza."""
+        okienko.blit(statek,(self.x,self.y))
         
-        self.gracz = pygame.Rect(self.x, self.y, self.szer, self.wys)
-
-        pygame.draw.rect(okienko, self.kolor, self.gracz)
 
     def przesuńGracza(self, keys):
         """Zmienia koordynaty gracza."""
@@ -93,9 +92,8 @@ class Gracz(Byt):
 class Przeciwnik(Byt):
     stworzonychPrzeciwników = 0
 
-    szer = OKNO_SZER//12
-    wys = szer * 3/4
-    kolor = (255, 0, 0)
+    szer = 128
+    wys = 123
     dx = 0
     dy = 0
 
@@ -109,9 +107,7 @@ class Przeciwnik(Byt):
     
     def rysujPrzeciwnika(self, okienko):
         """Rysuje instancję przeciwnika."""
-        self.przeciwnik = pygame.Rect(self.x, self.y, self.szer, self.wys)
-
-        pygame.draw.rect(okienko, self.kolor, self.przeciwnik)
+        okienko.blit(wróg,(self.x,self.y))
 
     def ruchPrzeciwnika(self):
         """Zmienia koordynaty przeciwnika."""
@@ -186,7 +182,7 @@ while graj:
 
     keys = pygame.key.get_pressed()
 
-    okienko.fill(TŁO)
+    okienko.blit(TŁO,(0,0))
 
     # WYKONUJE SIĘ NA KAŻDY TICK
     gracz.przesuńGracza(keys)
