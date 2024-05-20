@@ -1,6 +1,7 @@
 import pygame
 import time
 import random
+import os
 
 pygame.init()
 
@@ -8,9 +9,9 @@ pygame.init()
 OKNO_SZER = 1200
 OKNO_WYS = 700
 FPS = 60
-TŁO = pygame.image.load("kosmos.png")
-statek = pygame.image.load("statek.png")
-wróg = pygame.image.load("kosmita.png")
+TŁO = pygame.image.load(os.path.join("images/kosmos.png"))
+statek = pygame.image.load(os.path.join("images/statek.png"))
+wróg = pygame.image.load(os.path.join("images/kosmita.png"))
 
 # KLASA BYTU
 class Byt:
@@ -130,7 +131,7 @@ class Pocisk():
     def __init__(self):
         self.speed = 3
         self.szer = OKNO_SZER//30
-        self.wys = szer * 3/5
+        self.wys = self.szer * 3/5
     
     def rysujPocisk(self, okienko):
         """Rysuje pocisk."""
@@ -141,7 +142,7 @@ class Pocisk():
             
     def wystrzelPocisk(self, keys):
         """Przypisanie wystrzału do klawisza."""
-        if keys[pygame.K_SPACE]:
+        #if keys[pygame.K_SPACE]:
 
 
     
