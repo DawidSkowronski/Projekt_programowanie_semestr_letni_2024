@@ -9,9 +9,10 @@ pygame.init()
 OKNO_SZER = 1200
 OKNO_WYS = 700
 FPS = 60
-TŁO = pygame.image.load(os.path.join("images/kosmos.png"))
-statek = pygame.image.load(os.path.join("images/statek.png"))
-wróg = pygame.image.load(os.path.join("images/kosmita.png"))
+TŁO = pygame.image.load(os.path.join("images","kosmos.png"))
+statek = pygame.image.load(os.path.join("images","statek.png"))
+wróg = pygame.image.load(os.path.join("images","kosmita.png"))
+pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png"))
 
 # KLASA BYTU
 class Byt:
@@ -31,6 +32,13 @@ class Gracz(Byt):
 
     def __init__(self):
         Byt.__init__(self, 0, 0)
+        
+
+
+    def ustawGracza(self, x, y):
+        """Ustawia gracza na konkretne koordynaty."""
+        self.x = x
+        self.y = y
 
     def rysujGracza(self, okienko):
         """Rysuje instancję gracza."""
@@ -82,10 +90,10 @@ class Gracz(Byt):
         else:
             self.y += self.dy
 
-    def ustawGracza(self, x, y):
-        """Ustawia gracza na konkretne koordynaty."""
-        self.x = x
-        self.y = y
+    def wystrzelPocisk(self, keys):
+        """Przypisanie wystrzału do klawisza."""
+        if keys[pygame.K_SPACE]:
+            pocisk = Pocisk(x,y)
 
 
 
@@ -123,29 +131,30 @@ class Przeciwnik(Byt):
 
 # KLASA POCISK
 class Pocisk():
-    #szer = OKNO_SZER//12
-    #wys = szer * 3/4
-    kolor = (255, 255, 255)
-    dx = 0   
-    dy = 0
-    def __init__(self):
+    def __init__(self, x, y, img):
+        self.x = x
+        self.y = y
+
+        self.img = img
+        self.mask = pygame.mask.from_surface(self.img)  # mask tworzy dokładną siatkę pikseli wgranego obrazu 
+        
         self.speed = 3
-        self.szer = OKNO_SZER//30
-        self.wys = self.szer * 3/5
     
     def rysujPocisk(self, okienko):
         """Rysuje pocisk."""
+        okienko.blit(self.img, (self.x, self.y) )  # rysuje obraz na wyświetlanym oknie
         
-    def ustawPocisk(self, x, y):
-            self.x = x
-            self.y = y
+        
+    def ruchPocisku(self, speed):
+            self.y -= speed  # pocisk jest porusza się w górę
             
-    def wystrzelPocisk(self, keys):
-        """Przypisanie wystrzału do klawisza."""
-        #if keys[pygame.K_SPACE]:
 
+    def poza_oknem(self, wys ):    # usuwamy pociski poza oknem , żeby zostawiać zbędnych obiektów
+        """Sprawdza czy pocisk znajduje się w obszarze okna, jeśli nie usuwa go."""
+        return self.y >= wys + 10 and self.y <= -10
 
-    
+    #trzeba zdefiniować kolizję
+
 
         
 
