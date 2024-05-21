@@ -14,6 +14,8 @@ statek = pygame.image.load(os.path.join("images","statek.png"))
 wróg = pygame.image.load(os.path.join("images","kosmita.png"))
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png"))
 
+# "Desktop","space invaders","Projekt_programowanie_semestr_letni_2024", <---- ZOSTAWCIE TO PLS, bo nie chce mi sie odpalać tego w Bashu ~ Jakub W.
+
 # KLASA BYTU
 class Byt:
     """Klasa tworząca byt w grze."""
@@ -24,16 +26,14 @@ class Byt:
 # KLASA GRACZ
 class Gracz(Byt):
     """Klasa zawierająca funkcjonalność i anatomię gracza."""
-    szer = 115
-    wys = 132
+    szer = statek.get_width()
+    wys = statek.get_height()
     speed = 8
     dx = 0   
     dy = 0
 
     def __init__(self):
         Byt.__init__(self, 0, 0)
-        
-
 
     def ustawGracza(self, x, y):
         """Ustawia gracza na konkretne koordynaty."""
@@ -43,7 +43,6 @@ class Gracz(Byt):
     def rysujGracza(self, okienko):
         """Rysuje instancję gracza."""
         okienko.blit(statek,(self.x,self.y))
-        
 
     def przesuńGracza(self, keys):
         """Zmienia koordynaty gracza."""
@@ -93,7 +92,7 @@ class Gracz(Byt):
     def wystrzelPocisk(self, keys):
         """Przypisanie wystrzału do klawisza."""
         if keys[pygame.K_SPACE]:
-            pocisk = Pocisk(x,y)
+            pociskList.append(Pocisk(self.x + self.szer//2,  self.y + self.wys//2))
 
 
 
@@ -131,27 +130,35 @@ class Przeciwnik(Byt):
 
 # KLASA POCISK
 class Pocisk():
-    def __init__(self, x, y, img):
-        self.x = x
-        self.y = y
+    cooldown = 150
 
-        self.img = img
+    def __init__(self, x, y):
+        self.img = pocisk_gracza
+
+        self.x = x - self.img.get_width()//2
+        self.y = y - self.img.get_height()//2
+
         self.mask = pygame.mask.from_surface(self.img)  # mask tworzy dokładną siatkę pikseli wgranego obrazu 
         
         self.speed = 3
     
     def rysujPocisk(self, okienko):
         """Rysuje pocisk."""
-        okienko.blit(self.img, (self.x, self.y) )  # rysuje obraz na wyświetlanym oknie
-        
+        okienko.blit(self.img, (self.x, self.y))  # rysuje obraz na wyświetlanym oknie
+        if self.pozaOknem():
+            pociskList.remove(self)
+            del self
         
     def ruchPocisku(self, speed):
             self.y -= speed  # pocisk jest porusza się w górę
-            
 
-    def poza_oknem(self, wys ):    # usuwamy pociski poza oknem , żeby zostawiać zbędnych obiektów
+    def pozaOknem(self):    # usuwamy pociski poza oknem, żeby nie zostawiać zbędnych obiektów
         """Sprawdza czy pocisk znajduje się w obszarze okna, jeśli nie usuwa go."""
-        return self.y >= wys + 10 and self.y <= -10
+        czy_poza_oknem = False
+        if self.y < -pocisk_gracza.get_height():
+            czy_poza_oknem = True
+        return czy_poza_oknem
+            
 
     #trzeba zdefiniować kolizję
 
@@ -179,6 +186,8 @@ zegarek = pygame.time.Clock()
 
 # lista przeciwników
 enemyList = list[Przeciwnik]()
+pociskList = list[Pocisk]()
+czas_od_pocisku = 0
 
 graj = True
 while graj:
@@ -189,20 +198,31 @@ while graj:
             przeciwnik = Przeciwnik()
             przeciwnik.ustawPrzeciwnika(random.randint(0, OKNO_SZER - przeciwnik.szer), - przeciwnik.wys - 2)
             enemyList.append(przeciwnik)
-
+    
     keys = pygame.key.get_pressed()
 
     okienko.blit(TŁO,(0,0))
 
     # WYKONUJE SIĘ NA KAŻDY TICK
+    dt = zegarek.tick(FPS)
+
+    czas_od_pocisku += dt
+    if czas_od_pocisku > Pocisk.cooldown:
+        gracz.wystrzelPocisk(keys)
+        czas_od_pocisku = 0
+
+    for enemy in enemyList:
+        enemy.ruchPrzeciwnika()
+        enemy.rysujPrzeciwnika(okienko)
+
+    for pocisk in pociskList:
+        pocisk.ruchPocisku(30)
+        pocisk.rysujPocisk(okienko)
+
     gracz.przesuńGracza(keys)
     gracz.rysujGracza(okienko)
 
-    for enemy in enemyList:
-        enemy.rysujPrzeciwnika(okienko)
-        enemy.ruchPrzeciwnika()
-
     pygame.display.update()
-    zegarek.tick(FPS)
+    
 
 pygame.quit()
