@@ -13,6 +13,7 @@ TŁO = pygame.image.load(os.path.join("images","kosmos.png"))
 statek = pygame.image.load(os.path.join("images","statek.png"))
 wróg = pygame.image.load(os.path.join("images","kosmita.png"))
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png"))
+dźwięk_strzału = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 
 # "Desktop","space invaders","Projekt_programowanie_semestr_letni_2024", <---- ZOSTAWCIE TO PLS, bo nie chce mi sie odpalać tego w Bashu ~ Jakub W.
 
@@ -93,6 +94,7 @@ class Gracz(Byt):
         """Przypisanie wystrzału do klawisza."""
         if keys[pygame.K_SPACE]:
             pociskList.append(Pocisk(self.x + self.szer//2,  self.y + self.wys//2))
+            dźwięk_strzału.play()
 
 
 
