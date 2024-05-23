@@ -142,11 +142,6 @@ class Przeciwnik(Byt):
         self.x = x
         self.y = y
 
-    def wystrzelPocisk(self):
-        """Pozwala przeciwnikowi wystrzelić pocisk."""
-        pociskList.append(Pocisk(self.x + self.szer//2,  self.y + self.wys//2, -15, "przeciwnik"))
-        dźwięk_strzału.play()
-
 # KLASA POCISK
 class Pocisk(Byt):
     cooldown = 150
@@ -219,10 +214,6 @@ while graj:
         if zdarzenie.type == pygame.QUIT:
             graj = False
         if zdarzenie.type == pojaw_przeciwnika:
-            for enemy in enemyList:
-                randNum = random.randint(0, 30)
-                if randNum == 0:
-                    enemy.wystrzelPocisk()
             przeciwnik = Przeciwnik()
             przeciwnik.ustawPrzeciwnika(random.randint(0, OKNO_SZER - przeciwnik.szer), - przeciwnik.wys - 2)
             enemyList.append(przeciwnik)
@@ -253,13 +244,6 @@ while graj:
     for pocisk in pociskList:
         pocisk.ruchPocisku()
         pocisk.rysujPocisk(okienko)
-        if pocisk.ktoStrzelił == "przeciwnik":
-            if pocisk.czy_kolizja(gracz):
-                try:
-                    pociskList.remove(pocisk)
-                except ValueError:
-                    print(ValueError)
-            continue
         if pocisk.ktoStrzelił == "gracz":
             for enemy in enemyList:
                 if pocisk.czy_kolizja(enemy):
