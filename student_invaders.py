@@ -14,7 +14,8 @@ statek = pygame.image.load(os.path.join("images","statek.png"))
 wróg = pygame.image.load(os.path.join("images","kosmita.png"))
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png"))
 dźwięk_strzału = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
-
+dźwięk_strzału.set_volume(0.1)
+font = pygame.font.Font(None,32)
 # KLASA BYTU
 class Byt:
     """Klasa tworząca byt w grze."""
@@ -104,6 +105,39 @@ class Gracz(Byt):
     #     for pocisk in pociskList:
     #         if pocisk.czy_kolizja(obiekt):
     #             pociskList.remove(pocisk)
+
+# KLASA PUNKTY GRACZA
+class Score_board():
+    def __init__(self):
+        self.score = 0
+    def dodawanie_punktów(self,wartość):
+        self.score += wartość
+    def rysuj_scoreboard(self,surface):
+        okienko.blit(font.render("Score: " + str(self.score),True,(255,255,255)),(0,0))
+
+punkty = Score_board()
+
+# KLASA ŻYCIE GRACZA
+class Pasek_zdrowia():
+    def __init__(self, max_hp):
+        self.hp = max_hp
+        self.max_hp = max_hp
+
+    def rysuj_pasek(self, surface):
+        poziom_hp = self.hp / self.max_hp
+        pygame.draw.rect(surface, "red", (10, 660, 300, 30))
+        pygame.draw.rect(surface, "green", (10, 660, 300 * poziom_hp, 30))
+        okienko.blit(font.render("Poziom Zdrowia",True,(255,255,255)),(70,630))
+        
+    def zmiana_hp(self, wartość):
+        if self.hp + wartość >=  self.max_hp:
+            self.hp = self.max_hp
+        elif self.hp + wartość < 0:
+            self.hp = 0
+        else:
+            self.hp += wartość
+
+zdrowie = Pasek_zdrowia(100)
 
 # KLASA PRZECIWNIK
 class Przeciwnik(Byt):
@@ -236,6 +270,8 @@ while graj:
     for enemy in enemyList:
         if kolizja(enemy, gracz):
             enemyDoUsunięcia.append(enemy)
+            punkty.dodawanie_punktów(-100)
+            zdrowie.zmiana_hp(-20)
         enemy.ruchPrzeciwnika()
         enemy.rysujPrzeciwnika(okienko)
     for enemy in enemyDoUsunięcia:
@@ -249,12 +285,15 @@ while graj:
                 if pocisk.czy_kolizja(enemy):
                     try:
                         pociskList.remove(pocisk)
+                        punkty.dodawanie_punktów(200)
                     except ValueError:
                         print("Błąd, pocisku nie ma na liście.")
                     enemyList.remove(enemy)
 
     gracz.przesuńGracza(keys)
     gracz.rysujGracza(okienko)
+    punkty.rysuj_scoreboard(okienko)
+    zdrowie.rysuj_pasek(okienko)
 
     pygame.display.update()
     
