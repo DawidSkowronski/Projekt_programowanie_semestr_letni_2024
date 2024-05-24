@@ -14,8 +14,12 @@ statek = pygame.image.load(os.path.join("images","statek.png"))
 wróg = pygame.image.load(os.path.join("images","kosmita.png"))
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png"))
 dźwięk_strzału = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
-dźwięk_strzału.set_volume(0.1)
+dźwięk_strzału.set_volume(.1)
 font = pygame.font.Font(None,32)
+pygame.mixer.init()
+muza = pygame.mixer.music.load(os.path.join("music","muza.mp3"))
+pygame.mixer.music.set_volume(.25)
+pygame.mixer.music.play(-1, 0)
 # KLASA BYTU
 class Byt:
     """Klasa tworząca byt w grze."""
