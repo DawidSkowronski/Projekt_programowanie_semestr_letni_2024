@@ -199,6 +199,7 @@ class Pocisk(Byt):
             pociskList.remove(self)
             del self
         
+        
     def ruchPocisku(self):
         """Przemieszcza pocisk."""
         self.y -= self.speed  # pocisk jest porusza się pionowo
