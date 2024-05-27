@@ -10,10 +10,13 @@ OKNO_SZER = 1200
 OKNO_WYS = 700
 FPS = 60
 TŁO = pygame.image.load(os.path.join("images","kosmos.png"))
+GAME_OVER = pygame.image.load(os.path.join("images","game_over.png"))
 statek = pygame.image.load(os.path.join("images","statek.png"))
 wróg = pygame.image.load(os.path.join("images","kosmita.png"))
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png"))
+pocisk_wroga1 = pygame.image.load(os.path.join("images","pocisk_wróg1.png"))
 dźwięk_strzału = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
+dźwięk_wróg1 = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
 dźwięk_strzału.set_volume(.1)
 font = pygame.font.Font(None,32)
 pygame.mixer.init()
@@ -180,12 +183,21 @@ class Przeciwnik(Byt):
         self.x = x
         self.y = y
 
+    def wystrzelPocisk1(self):
+        """Pozwala przeciwnikowi wystrzelić pocisk"""
+        pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, 3, "wróg1"))
+        #dźwięk_wróg1.play()
+        return True
+
 # KLASA POCISK
 class Pocisk(Byt):
     cooldown = 150
 
     def __init__(self, x, y, speed, ktoStrzelił):
-        self.img = pocisk_gracza
+        if ktoStrzelił == "gracz":
+            self.img = pocisk_gracza
+        if ktoStrzelił == "wróg1":
+            self.img = pocisk_wroga1
         self.mask = pygame.mask.from_surface(self.img)  # mask tworzy dokładną siatkę pikseli wgranego obrazu
 
         Byt.__init__(self, x - self.img.get_width()//2, y - self.img.get_height()//2)
@@ -202,18 +214,23 @@ class Pocisk(Byt):
         
     def ruchPocisku(self):
         """Przemieszcza pocisk."""
-        self.y -= self.speed  # pocisk jest porusza się pionowo
-
+        if self.ktoStrzelił == "gracz":
+            self.y -= self.speed  # pocisk porusza się pionowo do góry (gracz)
+        else:
+            self.y += self.speed # pocisk porusza się pionowo do dołu (wrogowie)
+    
     def pozaOknem(self):    # usuwamy pociski poza oknem, żeby nie zostawiać zbędnych obiektów
         """Sprawdza, czy pocisk znajduje się w obszarze okna, jeśli nie -  usuwa go."""
         czy_poza_oknem = False
-        if self.y < -pocisk_gracza.get_height():
+        #if self.y < -pocisk_gracza.get_height() or self.y > OKNO_WYS: #Zrobiłem inaczej, potem się zmieni
+        if self.y > OKNO_WYS or self.y < 0:
             czy_poza_oknem = True
         return czy_poza_oknem
-    
+        #Czy nie łatwiej usunąć zmienną czy_poza_oknem i po prostu odpowiednio zwracać True lub False?
     def czy_kolizja(self, obiekt):
         """Sprawdza, czy następuje kolizja między pociskiem a obiektem"""
         return kolizja(self, obiekt)
+
 
 # DODAWANIE OBIEKTÓW
 # ustawiamy gracza na środku ekranu przy dole
@@ -225,6 +242,11 @@ gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 cykl_pojawienia_przeciwnika = 1000 #(milisekundy)
 pojaw_przeciwnika = pygame.USEREVENT
 pygame.time.set_timer(pojaw_przeciwnika, cykl_pojawienia_przeciwnika)
+
+# przeciwnik będzie strzelał co jakiś czas (niewykorzystane)
+cykl_strzał_wróg1 = 200
+strzał_wróg1 = pygame.USEREVENT + 1
+pygame.time.set_timer(strzał_wróg1, cykl_strzał_wróg1)
 
 #*************************#
 #           GRA           #
@@ -256,7 +278,10 @@ while graj:
             przeciwnik = Przeciwnik()
             przeciwnik.ustawPrzeciwnika(random.randint(0, OKNO_SZER - przeciwnik.szer), - przeciwnik.wys - 2)
             enemyList.append(przeciwnik)
-    
+        if zdarzenie.type == strzał_wróg1:
+            if enemyList != []:
+                random.choice(enemyList).wystrzelPocisk1()
+            
     keys = pygame.key.get_pressed()
 
     okienko.blit(TŁO,(0,0))
@@ -292,9 +317,17 @@ while graj:
                         pociskList.remove(pocisk)
                         punkty.dodawanie_punktów(200)
                     except ValueError:
-                        print("Błąd, pocisku nie ma na liście.")
+                        print("Błąd, pocisku gracza nie ma na liście.")
                     enemyList.remove(enemy)
-
+        if pocisk.ktoStrzelił == "wróg1":
+            if pocisk.czy_kolizja(gracz):
+                try:
+                    pociskList.remove(pocisk)
+                    punkty.dodawanie_punktów(-100)
+                    zdrowie.zmiana_hp(-20)
+                except ValueError:
+                    print("Błąd, pocisku przeciwnika1 nie ma na liście.")
+    
     gracz.przesuńGracza(keys)
     gracz.rysujGracza(okienko)
     punkty.rysuj_scoreboard(okienko)
@@ -302,5 +335,14 @@ while graj:
 
     pygame.display.update()
     
+    if zdrowie.hp <= 0 :
+        pygame.mixer.stop()
+        okienko.blit(GAME_OVER,(0,0))
+        pygame.display.update()
+        dźwięk = pygame.mixer.Sound('./music/game_over.mp3')
+        muza = pygame.mixer.music.load(os.path.join("music","game_over.mp3"))
+        pygame.mixer.music.play(-1, 0)
+        pygame.time.wait(int(dźwięk.get_length()) * 1000)
+        graj = False
 
 pygame.quit()
