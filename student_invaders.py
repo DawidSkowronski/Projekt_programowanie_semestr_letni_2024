@@ -116,11 +116,33 @@ class Gracz(Byt):
 # KLASA PUNKTY GRACZA
 class Score_board():
     def __init__(self):
+        self.czy_nowy_rekord = 0
         self.score = 0
+        try: 
+            with open(os.path.join("pliki","rekord.txt"), 'r') as rekord:
+                try:
+                    self.highscore = int(rekord.read())
+                except:
+                    self.highscore = 0
+        except:
+            with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
+                self.highscore = 0
+        print(self.highscore)
+    
     def dodawanie_punktów(self,wartość):
         self.score += wartość
+        if self.highscore < self.score:
+            self.czy_nowy_rekord = 1
+            self.highscore = self.score
+            with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
+                rekord.write(str(self.score))
+    
     def rysuj_scoreboard(self,surface):
         okienko.blit(font.render("Score: " + str(self.score),True,(255,255,255)),(0,0))
+        if self.czy_nowy_rekord == 1:
+                okienko.blit(font.render("NEW HIGHSCORE: " + str(self.highscore),True,(0, 200, 0)),(0,20))
+        else:
+            okienko.blit(font.render("Highscore: " + str(self.highscore),True,(255, 255, 255)),(0,20))
 
 punkty = Score_board()
 
@@ -171,6 +193,10 @@ class Przeciwnik(Byt):
     def rysujPrzeciwnika(self, okienko):
         """Rysuje instancję przeciwnika."""
         okienko.blit(wróg,(self.x,self.y))
+        if self.pozaOknem1():
+            print("PRZECIWNIK USUNIĘTY")
+            enemyList.remove(self)
+            del self
 
     def ruchPrzeciwnika(self):
         """Zmienia koordynaty przeciwnika."""
@@ -188,6 +214,12 @@ class Przeciwnik(Byt):
         pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, 3, "wróg1"))
         #dźwięk_wróg1.play()
         return True
+    
+    def pozaOknem1(self):    # usuwamy przeciwników poza oknem, żeby nie zostawiać zbędnych obiektów
+        """Sprawdza, czy przeciwnik znajduje się w obszarze okna, jeśli nie -  usuwa go."""
+        if self.y > OKNO_WYS + 5:
+            return True
+        return False
 
 # KLASA POCISK
 class Pocisk(Byt):
