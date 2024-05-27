@@ -120,12 +120,10 @@ class Score_board():
         self.score = 0
         try: 
             with open(os.path.join("pliki","rekord.txt"), 'r') as rekord:
-                try:
-                    self.highscore = int(rekord.read())
-                except:
-                    self.highscore = 0
+                self.highscore = int(rekord.read())
         except:
             with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
+                rekord.write(str(0))
                 self.highscore = 0
         print(self.highscore)
     
