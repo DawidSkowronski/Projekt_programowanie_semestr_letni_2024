@@ -2,27 +2,43 @@ import pygame
 import time
 import random
 import os
+import math
 
 pygame.init()
+##
+##      GLOBALNE
+##
 
-# GLOBALNE STAŁE
+# GŁÓWNE
 OKNO_SZER = 1200
 OKNO_WYS = 700
-FPS = 60
 TŁO = pygame.image.load(os.path.join("images","kosmos.png"))
 GAME_OVER = pygame.image.load(os.path.join("images","game_over.png"))
+font = pygame.font.Font(None,32)
+FPS = 60
+
+# SPRAJTY
 statek = pygame.image.load(os.path.join("images","statek.png"))
 wróg = pygame.image.load(os.path.join("images","kosmita.png"))
+wróg2 = pygame.image.load(os.path.join("images","przeciwnik2.png"))
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png"))
 pocisk_wroga1 = pygame.image.load(os.path.join("images","pocisk_wróg1.png"))
+pocisk_wroga2 = pygame.image.load(os.path.join("images","pocisk2.png"))
+
+
+# DŹWIĘKI
 dźwięk_strzału = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 dźwięk_wróg1 = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
 dźwięk_strzału.set_volume(.1)
-font = pygame.font.Font(None,32)
 pygame.mixer.init()
 muza = pygame.mixer.music.load(os.path.join("music","muza.mp3"))
 pygame.mixer.music.set_volume(.25)
 pygame.mixer.music.play(-1, 0)
+
+##
+##      KLASY
+##
+
 # KLASA BYTU
 class Byt:
     """Klasa tworząca byt w grze."""
@@ -33,6 +49,7 @@ class Byt:
 # KLASA GRACZ
 class Gracz(Byt):
     """Klasa zawierająca funkcjonalność i anatomię gracza."""
+    cooldown = 125
     szer = statek.get_width()
     wys = statek.get_height()
     speed = 10
@@ -98,11 +115,12 @@ class Gracz(Byt):
         else:
             self.y += self.dy
 
-    def wystrzelPocisk(self, keys, czas_od_pocisku):
+    def wystrzelPocisk(self, keys):
         """Pozwala graczowi wystrzelić pocisk, zwraca prawdę jeśli go wystrzeli."""
-        if czas_od_pocisku > Pocisk.cooldown:
+        if czas_od_pocisku > Gracz.cooldown:
             if keys[pygame.K_SPACE]:
-                pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, 25, "gracz"))
+                pociskList.append(Pocisk(self.x + self.szer//2 - 10, self.y + self.wys//2, 25, "gracz"))
+                pociskList.append(Pocisk(self.x + self.szer//2 + 10, self.y + self.wys//2, 25, "gracz"))
                 dźwięk_strzału.play()
                 return True
         return False
@@ -114,7 +132,7 @@ class Gracz(Byt):
     #             pociskList.remove(pocisk)
 
 # KLASA PUNKTY GRACZA
-class Score_board():
+class Scoreboard():
     def __init__(self):
         self.czy_nowy_rekord = 0
         self.score = 0
@@ -142,10 +160,8 @@ class Score_board():
         else:
             okienko.blit(font.render("Highscore: " + str(self.highscore),True,(255, 255, 255)),(0,20))
 
-punkty = Score_board()
-
 # KLASA ŻYCIE GRACZA
-class Pasek_zdrowia():
+class PasekZdrowia():
     def __init__(self, max_hp):
         self.hp = max_hp
         self.max_hp = max_hp
@@ -164,41 +180,46 @@ class Pasek_zdrowia():
         else:
             self.hp += wartość
 
-zdrowie = Pasek_zdrowia(100)
-
 # KLASA PRZECIWNIK
 class Przeciwnik(Byt):
     stworzonychPrzeciwników = 0
 
-    szer = 128
-    wys = 123
     dx = 0
     dy = 0
 
     def __init__(self):
         Byt.__init__(self, 0, 0)
 
-        # PRĘDKOŚĆ POCISKU
-        self.speed = 1
-
-        # ID PRZECIWNIKA (jeszcze niewykorzystywane)
+        # ID PRZECIWNIKA
         self.id = Przeciwnik.stworzonychPrzeciwników
         Przeciwnik.stworzonychPrzeciwników += 1
+        self.offset = czas_płynny_ruch_przeciwnika
 
-        self.ship_img = wróg
+        if Przeciwnik.stworzonychPrzeciwników % 10 == 0:
+            self.tag = "wróg2"
+            self.ship_img = wróg2
+            self.speed = 1
+            self.pocisk_speed = 5
+        else:
+            self.tag = "wróg1"
+            self.ship_img = wróg
+            self.speed = 3
+            self.pocisk_speed = 10
+
+        self.szer = self.ship_img.get_width()
+        self.wys = self.ship_img.get_width()
         self.mask = pygame.mask.from_surface(self.ship_img)
     
-    def rysujPrzeciwnika(self, okienko):
+    def rysujPrzeciwnika(self):
         """Rysuje instancję przeciwnika."""
-        okienko.blit(wróg,(self.x,self.y))
+        okienko.blit(self.ship_img,(self.x,self.y))
         if self.pozaOknem1():
             print("PRZECIWNIK USUNIĘTY")
-            enemyList.remove(self)
-            del self
+            enemyDoUsunięcia.append(self)
 
     def ruchPrzeciwnika(self):
         """Zmienia koordynaty przeciwnika."""
-        self.dy = self.speed
+        self.dy = self.speed * abs(math.sin(2*czas_płynny_ruch_przeciwnika/FPS + self.offset%FPS)) + .5
 
         self.y += self.dy
 
@@ -209,7 +230,7 @@ class Przeciwnik(Byt):
 
     def wystrzelPocisk1(self):
         """Pozwala przeciwnikowi wystrzelić pocisk"""
-        pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, 3, "wróg1"))
+        pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, self.pocisk_speed, self.tag))
         #dźwięk_wróg1.play()
         return True
     
@@ -221,26 +242,25 @@ class Przeciwnik(Byt):
 
 # KLASA POCISK
 class Pocisk(Byt):
-    cooldown = 150
-
     def __init__(self, x, y, speed, ktoStrzelił):
         if ktoStrzelił == "gracz":
             self.img = pocisk_gracza
         if ktoStrzelił == "wróg1":
             self.img = pocisk_wroga1
+        if ktoStrzelił == "wróg2":
+            self.img = pocisk_wroga2
+
         self.mask = pygame.mask.from_surface(self.img)  # mask tworzy dokładną siatkę pikseli wgranego obrazu
 
         Byt.__init__(self, x - self.img.get_width()//2, y - self.img.get_height()//2)
         self.speed = speed
         self.ktoStrzelił = ktoStrzelił
     
-    def rysujPocisk(self, okienko):
+    def rysujPocisk(self):
         """Rysuje pocisk."""
         okienko.blit(self.img, (self.x, self.y))  # rysuje obraz na wyświetlanym oknie
         if self.pozaOknem():
-            pociskList.remove(self)
-            del self
-        
+            pociskiDoUsunięcia.append(self)
         
     def ruchPocisku(self):
         """Przemieszcza pocisk."""
@@ -250,24 +270,32 @@ class Pocisk(Byt):
             self.y += self.speed # pocisk porusza się pionowo do dołu (wrogowie)
     
     def pozaOknem(self):    # usuwamy pociski poza oknem, żeby nie zostawiać zbędnych obiektów
-        """Sprawdza, czy pocisk znajduje się w obszarze okna, jeśli nie -  usuwa go."""
+        """Sprawdza, czy pocisk znajduje się w obszarze okna."""
         czy_poza_oknem = False
         #if self.y < -pocisk_gracza.get_height() or self.y > OKNO_WYS: #Zrobiłem inaczej, potem się zmieni
-        if self.y > OKNO_WYS or self.y < 0:
+        if self.y > OKNO_WYS or self.y < -30:
             czy_poza_oknem = True
         return czy_poza_oknem
         #Czy nie łatwiej usunąć zmienną czy_poza_oknem i po prostu odpowiednio zwracać True lub False?
+    
     def czy_kolizja(self, obiekt):
-        """Sprawdza, czy następuje kolizja między pociskiem a obiektem"""
+        """Sprawdza, czy następuje kolizja między pociskiem a obiektem."""
         return kolizja(self, obiekt)
 
+##
+##      OBIEKTY
+##
 
-# DODAWANIE OBIEKTÓW
-# ustawiamy gracza na środku ekranu przy dole
+punkty = Scoreboard()
+zdrowie = PasekZdrowia(100)
+
 gracz = Gracz()
 gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 
-# ZDARZENIA
+##
+##  ZDARZENIA
+## 
+
 # pojawia przeciwnika co jakiś czas
 cykl_pojawienia_przeciwnika = 1000 #(milisekundy)
 pojaw_przeciwnika = pygame.USEREVENT
@@ -278,12 +306,13 @@ cykl_strzał_wróg1 = 200
 strzał_wróg1 = pygame.USEREVENT + 1
 pygame.time.set_timer(strzał_wróg1, cykl_strzał_wróg1)
 
-#*************************#
-#           GRA           #
-#*************************#
+##*************************##
+##           GRA           ##
+##*************************##
 okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
+podział_okienka = range(0, OKNO_SZER - wróg.get_width(), wróg.get_width())
 pygame.display.set_caption("Student Invaders")
-pygame.display.set_icon(wróg)
+pygame.display.set_icon(statek)
 zegarek = pygame.time.Clock()
 
 #   LISTY
@@ -291,6 +320,7 @@ enemyList = list[Przeciwnik]()          # lista przeciwników
 pociskList = list[Pocisk]()             # lista pocisków
 
 czas_od_pocisku = 0
+czas_płynny_ruch_przeciwnika = 0
 
 # funkcja sprawdzająca kolizję obiektów
 def kolizja(obiekt1, obiekt2):
@@ -306,11 +336,12 @@ while graj:
             graj = False
         if zdarzenie.type == pojaw_przeciwnika:
             przeciwnik = Przeciwnik()
-            przeciwnik.ustawPrzeciwnika(random.randint(0, OKNO_SZER - przeciwnik.szer), - przeciwnik.wys - 2)
+            gdzie_przeciwnik = random.choice(podział_okienka)
+            przeciwnik.ustawPrzeciwnika(gdzie_przeciwnik, - przeciwnik.wys - 2)
             enemyList.append(przeciwnik)
-        if zdarzenie.type == strzał_wróg1:
-            if enemyList != []:
-                random.choice(enemyList).wystrzelPocisk1()
+        # if zdarzenie.type == strzał_wróg1:
+        #     if enemyList != []:
+        #         random.choice(enemyList).wystrzelPocisk1()
             
     keys = pygame.key.get_pressed()
 
@@ -319,45 +350,58 @@ while graj:
     # WYKONUJE SIĘ NA KAŻDY TICK
     dt = zegarek.tick(FPS)
     czas_od_pocisku += dt
+    czas_płynny_ruch_przeciwnika += dt/17
+    print(czas_płynny_ruch_przeciwnika)
 
-    if gracz.wystrzelPocisk(keys, czas_od_pocisku):
+    if gracz.wystrzelPocisk(keys):
         czas_od_pocisku = 0
     
     if czas_od_pocisku > 2000:
-        czas_od_pocisku = Pocisk.cooldown
+        czas_od_pocisku = Gracz.cooldown
+    
 
     enemyDoUsunięcia = []
+    strzelający_przeciwnik = random.randint(0, 300)
     for enemy in enemyList:
+        if enemy.id == strzelający_przeciwnik:
+            enemy.wystrzelPocisk1()
         if kolizja(enemy, gracz):
             enemyDoUsunięcia.append(enemy)
             punkty.dodawanie_punktów(-100)
             zdrowie.zmiana_hp(-20)
         enemy.ruchPrzeciwnika()
-        enemy.rysujPrzeciwnika(okienko)
-    for enemy in enemyDoUsunięcia:
-        enemyList.remove(enemy)
+        enemy.rysujPrzeciwnika()
 
+    pociskiDoUsunięcia = []
     for pocisk in pociskList:
         pocisk.ruchPocisku()
-        pocisk.rysujPocisk(okienko)
+        pocisk.rysujPocisk()
         if pocisk.ktoStrzelił == "gracz":
             for enemy in enemyList:
                 if pocisk.czy_kolizja(enemy):
-                    try:
-                        pociskList.remove(pocisk)
-                        punkty.dodawanie_punktów(200)
-                    except ValueError:
-                        print("Błąd, pocisku gracza nie ma na liście.")
-                    enemyList.remove(enemy)
-        if pocisk.ktoStrzelił == "wróg1":
+                    pociskiDoUsunięcia.append(pocisk)        
+                    punkty.dodawanie_punktów(200)
+                    enemyDoUsunięcia.append(enemy)
+        if pocisk.ktoStrzelił in ("wróg1", "wróg2"):
             if pocisk.czy_kolizja(gracz):
-                try:
-                    pociskList.remove(pocisk)
-                    punkty.dodawanie_punktów(-100)
-                    zdrowie.zmiana_hp(-20)
-                except ValueError:
-                    print("Błąd, pocisku przeciwnika1 nie ma na liście.")
-    
+                pociskiDoUsunięcia.append(pocisk)
+                punkty.dodawanie_punktów(-100)
+                strata = -20 if pocisk.ktoStrzelił == "wróg1" else -40
+                zdrowie.zmiana_hp(strata)
+                #^^^^^^^^^^^^^^^^^^
+                #tutaj zrobimy stratę hp zależną od typu przeciwnika (to jak zrobimy klasę typów przeciwnika albo wczytywanie pliku)
+
+    for enemy in enemyDoUsunięcia:
+        try:
+            enemyList.remove(enemy)
+        except:
+            print("Błąd usunięcia przeciwnika.")
+    for pocisk in pociskiDoUsunięcia:
+        try:
+            pociskList.remove(pocisk)
+        except:
+            print("Błąd usunięcia pocisku.")
+
     gracz.przesuńGracza(keys)
     gracz.rysujGracza(okienko)
     punkty.rysuj_scoreboard(okienko)
