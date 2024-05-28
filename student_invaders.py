@@ -170,7 +170,7 @@ class PasekZdrowia():
         poziom_hp = self.hp / self.max_hp
         pygame.draw.rect(surface, "red", (10, 660, 300, 30))
         pygame.draw.rect(surface, "green", (10, 660, 300 * poziom_hp, 30))
-        okienko.blit(font.render("Poziom Zdrowia",True,(255,255,255)),(70,630))
+        okienko.blit(font.render("HP",True,'green'),(140,630))
         
     def zmiana_hp(self, wartość):
         if self.hp + wartość >=  self.max_hp:
@@ -200,11 +200,13 @@ class Przeciwnik(Byt):
             self.ship_img = wróg2
             self.speed = 1
             self.pocisk_speed = 5
+            self.hp = 5
         else:
             self.tag = "wróg1"
             self.ship_img = wróg
             self.speed = 3
             self.pocisk_speed = 10
+            self.hp = 3
 
         self.szer = self.ship_img.get_width()
         self.wys = self.ship_img.get_width()
@@ -379,9 +381,11 @@ while graj:
         if pocisk.ktoStrzelił == "gracz":
             for enemy in enemyList:
                 if pocisk.czy_kolizja(enemy):
-                    pociskiDoUsunięcia.append(pocisk)        
-                    punkty.dodawanie_punktów(200)
-                    enemyDoUsunięcia.append(enemy)
+                    pociskiDoUsunięcia.append(pocisk)
+                    enemy.hp += -1
+                    if enemy.hp == 0:
+                        punkty.dodawanie_punktów(200)
+                        enemyDoUsunięcia.append(enemy)
         if pocisk.ktoStrzelił in ("wróg1", "wróg2"):
             if pocisk.czy_kolizja(gracz):
                 pociskiDoUsunięcia.append(pocisk)
