@@ -134,7 +134,6 @@ class Gracz(Byt):
 # KLASA PUNKTY GRACZA
 class Scoreboard():
     def __init__(self):
-        self.czy_nowy_rekord = 0
         self.score = 0
         try: 
             with open(os.path.join("pliki","rekord.txt"), 'r') as rekord:
@@ -147,18 +146,16 @@ class Scoreboard():
     
     def dodawanie_punktów(self,wartość):
         self.score += wartość
-        if self.highscore < self.score:
-            self.czy_nowy_rekord = 1
-            self.highscore = self.score
-            with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
-                rekord.write(str(self.score))
     
     def rysuj_scoreboard(self,surface):
         okienko.blit(font.render("Score: " + str(self.score),True,(255,255,255)),(0,0))
-        if self.czy_nowy_rekord == 1:
-                okienko.blit(font.render("NEW HIGHSCORE: " + str(self.highscore),True,(0, 200, 0)),(0,20))
+        if self.highscore < self.score:
+                okienko.blit(font.render("NEW HIGHSCORE: " + str(self.score),True,(0, 200, 0)),(0,20))
         else:
             okienko.blit(font.render("Highscore: " + str(self.highscore),True,(255, 255, 255)),(0,20))
+        if zdrowie.hp <= 0 and self.highscore < self.score:
+            with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
+                rekord.write(str(self.score))
 
 # KLASA ŻYCIE GRACZA
 class PasekZdrowia():
