@@ -14,8 +14,10 @@ OKNO_SZER = 1200
 OKNO_WYS = 700
 TŁO = pygame.image.load(os.path.join("images","kosmos.png"))
 GAME_OVER = pygame.image.load(os.path.join("images","game_over.png"))
+PAUZA = pygame.image.load(os.path.join("images","pauza.png"))
 font = pygame.font.Font(None,32)
 FPS = 60
+pauza = False
 
 # SPRAJTY
 statek = pygame.image.load(os.path.join("images","statek.png"))
@@ -135,6 +137,10 @@ class Gracz(Byt):
 class Scoreboard():
     def __init__(self):
         self.score = 0
+        try:
+            os.mkdir('.\pliki')
+        except:
+            print("Katalog już istnieje")
         try: 
             with open(os.path.join("pliki","rekord.txt"), 'r') as rekord:
                 self.highscore = int(rekord.read())
@@ -333,19 +339,23 @@ while graj:
     for zdarzenie in pygame.event.get():
         if zdarzenie.type == pygame.QUIT:
             graj = False
-        if zdarzenie.type == pojaw_przeciwnika:
+        if zdarzenie.type == pojaw_przeciwnika and pauza is False: #pauza is False po to, aby przeciwnicy nie generowali się w trakcie pauzy
             przeciwnik = Przeciwnik()
             gdzie_przeciwnik = random.choice(podział_okienka)
             przeciwnik.ustawPrzeciwnika(gdzie_przeciwnik, - przeciwnik.wys - 2)
             enemyList.append(przeciwnik)
+        if zdarzenie.type == pygame.KEYDOWN and zdarzenie.key == pygame.K_ESCAPE:
+            pauza = not pauza
+
         # if zdarzenie.type == strzał_wróg1:
         #     if enemyList != []:
         #         random.choice(enemyList).wystrzelPocisk1()
             
     keys = pygame.key.get_pressed()
-
+    if pauza:
+        continue #continue pwooduje, że pętla graj zaczyna się na nowo, więc dopóki nie skończymy pauzy, to nic nie będzie się poruszało
+    
     okienko.blit(TŁO,(0,0))
-
     # WYKONUJE SIĘ NA KAŻDY TICK
     dt = zegarek.tick(FPS)
     czas_od_pocisku += dt
