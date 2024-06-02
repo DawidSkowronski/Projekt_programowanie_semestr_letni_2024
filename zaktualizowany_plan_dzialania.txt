@@ -1,0 +1,24 @@
+PLAN DZIAŁANIA NA NASTĘPNE TYGODNIE
+
+1. Wprowadzenie animacji wybuchu statków.
+2. Wprowadzenie zmiany wyglądu statków w zależności od otrzymanych obrażeń.
+3. Stworzenie ekranu startowego (menu z przyciskami "start", "wyjdź", można spróbować dodać opcję włączenia/wyłączenia dźwięku).
+4.Dodanie losowych bonusów, które będą zmieniać statystki statku gracza (odnowienie wytrzymałości, zwiększenie obrażeń, itp.)
+5. Dodanie więcej typów wrogów.
+6. Dodanie alternatywnego strzału statku gracza.
+7. Dodanie mechaniki przegrzewania się broni gracza
+8. Dodanie barier, w dolnej części okna gry, które będą chronić gracza
+9. Dodanie unittestów.
+10. Dostosowanie parametrów gry, żeby nie była zbyt prosta, ale także możliwa do ukończenia
+11. Sprawdzenie spójności kodu, złych zapachów, nieobsługiwanych wyjatków. Ogólne testy gry.
+
+Z czego zrezygnowaliśmy:
+- wrogowie w rożnych kolorach, którzy byliby wrażliwi jedynie na dany typ broni (zamiast tego wprowadzimy różne typy wrogów),
+- quiz matematyczny.
+
+Co może ulec zmianie (kolejne pomysły):
+- Jeśli nie uda się wprowadzić zamierzonych funkcjonalnośći, konieczne może być przepisanie kodu w taki sposób, żeby opierał się na klasie pygame.sprite.Sprite (może to zwiększyć czytelność kodu i zoptymalizować grę).
+- Bariery mogą tworzyć się w kilku możliwych kombinacjach (wprowadzenie pewnej losowości).
+- Walka z bossem.
+- Wprowadzenie typów gry (nieskończone fale przeciwników; przygotowane scenariusze).
+- Dodanie losowego tła z pewnej puli (dla różnorodnośći).
