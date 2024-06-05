@@ -37,6 +37,9 @@ exit = pygame.image.load(os.path.join("images","EXIT.png"))
 wznów = pygame.image.load(os.path.join("images","kontynuuj.jpg"))
 wyjdź = pygame.image.load(os.path.join("images","wyjdź.jpg"))
 
+włączony = pygame.image.load(os.path.join("images","włączony.jpg"))
+wyłączony = pygame.image.load(os.path.join("images","wyłączony.jpg"))
+
 # DŹWIĘKI
 dźwięk_strzału = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 dźwięk_wróg1 = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
@@ -151,7 +154,7 @@ class Gracz(Byt):
             if keys[pygame.K_SPACE]:
                 pociskList.append(Pocisk(self.x + self.szer//2 - 10, self.y + self.wys//2, 25, "gracz"))
                 pociskList.append(Pocisk(self.x + self.szer//2 + 10, self.y + self.wys//2, 25, "gracz"))
-                dźwięk_strzału.play()
+                if dźwięk: dźwięk_strzału.play()
                 return True
         return False
 
@@ -273,7 +276,7 @@ class Przeciwnik(Byt):
     def wystrzelPocisk1(self):
         """Pozwala przeciwnikowi wystrzelić pocisk"""
         pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, self.pocisk_speed, self.tag))
-        #dźwięk_wróg1.play()
+        #if dźwięk: dźwięk_wróg1.play()
         return True
     
     def pozaOknem1(self):    # usuwamy przeciwników poza oknem, żeby nie zostawiać zbędnych obiektów
@@ -378,15 +381,22 @@ menu = True
 START = Przycisk(0, 0, start)
 EXIT = Przycisk(450, 0, exit)
 
+dźwięk = True
+
 while menu:
     START.RysujPrzycisk()
     EXIT.RysujPrzycisk()
+    if dźwięk:
+        DŹWIĘK = Przycisk(400, 200, włączony)
+    else:
+        DŹWIĘK = Przycisk(400, 200, wyłączony)
+    DŹWIĘK.RysujPrzycisk()
     pygame.display.update()
     for zdarzenie in pygame.event.get():
         if zdarzenie.type == pygame.KEYDOWN:
             if zdarzenie.key == pygame.K_LSHIFT: # chciałem enter ale nie działa
                 graj = True
-                pygame.mixer.music.play(-1, 0)
+                if dźwięk: pygame.mixer.music.play(-1, 0)
                 menu = False
             elif zdarzenie.key == pygame.K_ESCAPE:
                 graj = False
@@ -394,11 +404,13 @@ while menu:
         elif zdarzenie.type == pygame.MOUSEBUTTONUP:
             if START.CzyMyszka():
                 graj = True
-                pygame.mixer.music.play(-1, 0)
+                if dźwięk: pygame.mixer.music.play(-1, 0)
                 menu = False
             elif EXIT.CzyMyszka():
                 menu = False
                 graj = False
+            elif DŹWIĘK.CzyMyszka():
+                dźwięk = not dźwięk
 
 while graj:
     for zdarzenie in pygame.event.get():
@@ -510,10 +522,10 @@ while graj:
         pygame.mixer.stop()
         okienko.blit(GAME_OVER,(0,0))
         pygame.display.update()
-        dźwięk = pygame.mixer.Sound('./music/game_over.mp3')
+        game_over = pygame.mixer.Sound('./music/game_over.mp3')
         muza = pygame.mixer.music.load(os.path.join("music","game_over.mp3"))
-        pygame.mixer.music.play(-1, 0)
-        pygame.time.wait(int(dźwięk.get_length()) * 1000)
+        if dźwięk: pygame.mixer.music.play(-1, 0)
+        pygame.time.wait(int(game_over.get_length()) * 1000)
         graj = False
 
 pygame.quit()
