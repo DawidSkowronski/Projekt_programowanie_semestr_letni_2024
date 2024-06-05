@@ -22,7 +22,11 @@ pauza = False
 # SPRAJTY
 statek = pygame.image.load(os.path.join("images","statek.png"))
 wróg = pygame.image.load(os.path.join("images","kosmita.png"))
+wróg_obrażenia1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png"))
+wróg_obrażenia2 = pygame.image.load(os.path.join("images","kosmita_dmg2.png"))
 wróg2 = pygame.image.load(os.path.join("images","przeciwnik2.png"))
+wróg2_obrażenia1 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png"))
+wróg2_obrażenia2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png"))
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png"))
 pocisk_wroga1 = pygame.image.load(os.path.join("images","pocisk_wróg1.png"))
 pocisk_wroga2 = pygame.image.load(os.path.join("images","pocisk2.png"))
@@ -201,15 +205,19 @@ class Przeciwnik(Byt):
         if Przeciwnik.stworzonychPrzeciwników % 10 == 0:
             self.tag = "wróg2"
             self.ship_img = wróg2
+            self.ship_img2 = wróg2_obrażenia1
+            self.ship_img3 = wróg2_obrażenia2
             self.speed = 1
             self.pocisk_speed = 5
-            self.hp = 5
+            self.hp = 7
         else:
             self.tag = "wróg1"
             self.ship_img = wróg
+            self.ship_img2 = wróg_obrażenia1
+            self.ship_img3 = wróg_obrażenia2
             self.speed = 3
             self.pocisk_speed = 10
-            self.hp = 3
+            self.hp = 5
 
         self.szer = self.ship_img.get_width()
         self.wys = self.ship_img.get_width()
@@ -217,7 +225,12 @@ class Przeciwnik(Byt):
     
     def rysujPrzeciwnika(self):
         """Rysuje instancję przeciwnika."""
-        okienko.blit(self.ship_img,(self.x,self.y))
+        if self.hp <= 2:
+            okienko.blit(self.ship_img3,(self.x,self.y))
+        elif self.hp <= 4:
+            okienko.blit(self.ship_img2,(self.x,self.y))
+        else:
+            okienko.blit(self.ship_img,(self.x,self.y))
         if self.pozaOknem1():
             print("PRZECIWNIK USUNIĘTY")
             enemyDoUsunięcia.append(self)
