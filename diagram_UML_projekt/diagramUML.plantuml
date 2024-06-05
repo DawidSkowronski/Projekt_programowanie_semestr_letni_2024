@@ -1,0 +1,115 @@
+@startuml
+
+class Byt{
+x
+y    
+--
+__init__(self, x, y)
+}
+
+class Gracz {
+    {static} cooldown = 125
+    {static} szer 
+    {static} wys
+    {static} speed = 10
+    {static} dx = 0
+    {static} dy = 0
+    ship_img
+    mask
+    --
+    __init__(self)
+    ustawGracza(self, x, y)
+    rysujGracza(self, okienko)
+    przesuńGracza(self, keys)
+    wystrzelPocisk(self, keys)
+}
+
+class Score_board{
+    score
+    highscore
+    --
+    __init__(self)
+    dodawanie_punktów(self, wartość)
+    rysuj_scoreboard(self, surface)
+}
+
+class Pasek_zdrowia{
+    hp
+    max_hp
+    --
+    __init__(self, max_hp)
+    rysuj_pasek(self, surface)
+    zmiana_hp(self, wartość)
+    
+}
+
+class Przeciwnik{
+    {static} stworzonychPrzeciwników = 0
+    {static} dx = 0
+    {static} dy = 0
+    id
+    offset
+    tag
+    ship_img
+    speed
+    pocisk_speed
+    hp
+    szer
+    wys
+    mask
+    --
+    __init__(self)
+    rysujPrzeciwnika(self)
+    ruchPrzeciwnika(self)
+    ustawPrzeciwnika(self)
+    wystrzelPocisk(self)
+    pozaOknem(self)
+}
+
+class Pocisk{
+    x
+    y
+    speed
+    ktoStrzelił
+    img
+    --
+    __init__(self, x, y, speed, ktoStrzelił)
+    rysujPocisk(self)
+    ruchPocisku(self)
+    pozaOknem(self)
+    czy_kolizja(self, obiekt)
+}
+
+class Bariera{
+    max_hp
+    hp
+    x
+    y
+    img
+    --
+    __init__(self, x, y)
+    rysujBarierę(self)
+    czy_kolizja(self, obiekt)
+}
+
+
+class Eksplozja{
+img_lista
+id
+image
+licznik
+--
+__init__(self, x, y)
+rysujEksplozja(self)
+}
+
+
+Gracz --|> Byt
+Przeciwnik --|> Byt
+Pocisk --|> Byt
+Bariera --|> Byt
+
+@enduml
+
+#WĄTPLIWOŚĆI
+#CZY ATRYBUTY PODAJEMY TYLKO Z __init__, czy ze wszystkich method 
