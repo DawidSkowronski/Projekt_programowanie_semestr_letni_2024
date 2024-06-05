@@ -1,0 +1,7 @@
+W - ruch w górę
+S - ruch w dół
+A - ruch w lewo
+D - ruch w prawo
+Spacja - strzał
+
+Zadaniem gracza jest zdobycie jak największego wyniku. Ale uwaga, zderzenie z kosmitą lub jego pociskiem powoduje obrażenia. Dostaniesz ich za dużo i PRZEGRYWASZ.
