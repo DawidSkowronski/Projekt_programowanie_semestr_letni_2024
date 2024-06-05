@@ -364,13 +364,16 @@ while graj:
         #     if enemyList != []:
         #         random.choice(enemyList).wystrzelPocisk1()
             
+    dt = zegarek.tick(FPS)
+    
     keys = pygame.key.get_pressed()
     if pauza:
+        okienko.blit(PAUZA, (0, 0))
+        pygame.display.update() # to ważne, nie usuwać
         continue #continue pwooduje, że pętla graj zaczyna się na nowo, więc dopóki nie skończymy pauzy, to nic nie będzie się poruszało
     
-    okienko.blit(TŁO,(0,0))
     # WYKONUJE SIĘ NA KAŻDY TICK
-    dt = zegarek.tick(FPS)
+    okienko.blit(TŁO, (0,0))
     czas_od_pocisku += dt
     czas_płynny_ruch_przeciwnika += dt/17
     print(czas_płynny_ruch_przeciwnika)
@@ -381,7 +384,6 @@ while graj:
     if czas_od_pocisku > 2000:
         czas_od_pocisku = Gracz.cooldown
     
-
     enemyDoUsunięcia = []
     strzelający_przeciwnik = random.randint(0, 300)
     for enemy in enemyList:
