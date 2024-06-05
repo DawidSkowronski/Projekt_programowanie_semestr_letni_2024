@@ -24,13 +24,18 @@ statek = pygame.image.load(os.path.join("images","statek.png"))
 wróg = pygame.image.load(os.path.join("images","kosmita.png"))
 wróg_obrażenia1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png"))
 wróg_obrażenia2 = pygame.image.load(os.path.join("images","kosmita_dmg2.png"))
-wróg2 = pygame.image.load(os.path.join("images","przeciwnik2.png"))
+wróg2 = pygame.image.load(os.path.join("images","przeciwnik2.png")) 
 wróg2_obrażenia1 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png"))
 wróg2_obrażenia2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png"))
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png"))
 pocisk_wroga1 = pygame.image.load(os.path.join("images","pocisk_wróg1.png"))
 pocisk_wroga2 = pygame.image.load(os.path.join("images","pocisk2.png"))
 
+start = pygame.image.load(os.path.join("images","START.png"))
+exit = pygame.image.load(os.path.join("images","EXIT.png"))
+
+wznów = pygame.image.load(os.path.join("images","kontynuuj.jpg"))
+wyjdź = pygame.image.load(os.path.join("images","wyjdź.jpg"))
 
 # DŹWIĘKI
 dźwięk_strzału = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
@@ -39,7 +44,7 @@ dźwięk_strzału.set_volume(.1)
 pygame.mixer.init()
 muza = pygame.mixer.music.load(os.path.join("music","muza.mp3"))
 pygame.mixer.music.set_volume(.25)
-pygame.mixer.music.play(-1, 0)
+#pygame.mixer.music.play(-1, 0)
 
 ##
 ##      KLASY
@@ -51,6 +56,25 @@ class Byt:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+# KLASA PRZYCISK
+class Przycisk(Byt):
+    """Klasa zawierająca funkcjonalność przycisków"""
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+    
+    def RysujPrzycisk(self):
+        """Ustawia dany przycisk na odpowiednie miejsce"""
+        okienko.blit(self.image, (self.rect.x, self.rect.y))
+    
+    def CzyMyszka(self):
+        """Sprawdza, czy myszka jest "na powierzchni" przycisku"""
+        myszka = pygame.mouse.get_pos()
+        if self.rect.collidepoint(myszka):
+            return True
+        return False
 
 # KLASA GRACZ
 class Gracz(Byt):
@@ -347,7 +371,35 @@ def kolizja(obiekt1, obiekt2):
     ramka_y = obiekt2.y - obiekt1.y
     return obiekt1.mask.overlap(obiekt2.mask, (ramka_x, ramka_y)) != None 
 
-graj = True
+WZNÓW = Przycisk(0, 200, wznów)
+WYJDŹ = Przycisk(200, 200, wyjdź)
+
+menu = True
+START = Przycisk(0, 0, start)
+EXIT = Przycisk(450, 0, exit)
+
+while menu:
+    START.RysujPrzycisk()
+    EXIT.RysujPrzycisk()
+    pygame.display.update()
+    for zdarzenie in pygame.event.get():
+        if zdarzenie.type == pygame.KEYDOWN:
+            if zdarzenie.key == pygame.K_LSHIFT: # chciałem enter ale nie działa
+                graj = True
+                pygame.mixer.music.play(-1, 0)
+                menu = False
+            elif zdarzenie.key == pygame.K_ESCAPE:
+                graj = False
+                menu = False
+        elif zdarzenie.type == pygame.MOUSEBUTTONUP:
+            if START.CzyMyszka():
+                graj = True
+                pygame.mixer.music.play(-1, 0)
+                menu = False
+            elif EXIT.CzyMyszka():
+                menu = False
+                graj = False
+
 while graj:
     for zdarzenie in pygame.event.get():
         if zdarzenie.type == pygame.QUIT:
@@ -359,6 +411,7 @@ while graj:
             enemyList.append(przeciwnik)
         if zdarzenie.type == pygame.KEYDOWN and zdarzenie.key == pygame.K_ESCAPE:
             pauza = not pauza
+            pygame.mixer.music.set_volume(.03)
 
         # if zdarzenie.type == strzał_wróg1:
         #     if enemyList != []:
@@ -367,10 +420,28 @@ while graj:
     dt = zegarek.tick(FPS)
     
     keys = pygame.key.get_pressed()
+    
     if pauza:
         okienko.blit(PAUZA, (0, 0))
+        WZNÓW.RysujPrzycisk()
+        WYJDŹ.RysujPrzycisk()
         pygame.display.update() # to ważne, nie usuwać
-        continue #continue pwooduje, że pętla graj zaczyna się na nowo, więc dopóki nie skończymy pauzy, to nic nie będzie się poruszało
+        for zdarzenie in pygame.event.get():
+            if zdarzenie.type == pygame.KEYDOWN:
+                if zdarzenie.key == pygame.K_LSHIFT: # chciałem enter ale nie działa
+                    pygame.mixer.music.set_volume(.25)
+                    pauza = False
+                elif zdarzenie.key == pygame.K_ESCAPE:
+                    graj = False
+                    pauza = False
+            elif zdarzenie.type == pygame.MOUSEBUTTONDOWN:
+                if WZNÓW.CzyMyszka():
+                    pygame.mixer.music.set_volume(.25)
+                    pauza = False
+                elif WYJDŹ.CzyMyszka():
+                    graj = False
+                    pauza = False
+        continue # continue powoduje, że pętla graj zaczyna się na nowo, więc dopóki nie skończymy pauzy, to nic nie będzie się poruszało
     
     # WYKONUJE SIĘ NA KAŻDY TICK
     okienko.blit(TŁO, (0,0))
