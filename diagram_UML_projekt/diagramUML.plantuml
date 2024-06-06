@@ -111,6 +111,27 @@ __init__(self, x, y)
 rysujEksplozja(self)
 }
 
+class Pasek_przegrzania{
+    obecny_poz
+    max_poz
+    --
+    __init__(self, max_poz)
+    czy_strzał(self)
+    rysuj_pasek(self, surface)
+    zmiana_poz(self, wartość)
+}
+
+class PowerUp{
+    x
+    y
+    img
+    --
+    __init__(self,x,y)
+    rysuj_power_up(self)
+    czy_kolizja(self,obiekt)
+    ruch_power_up(self)
+}
+
 
 Gracz --|> Byt
 Przeciwnik --|> Byt
@@ -118,6 +139,3 @@ Pocisk --|> Byt
 Bariera --|> Byt
 Przycisk --|> Byt
 @enduml
-
-#WĄTPLIWOŚĆI
-#CZY ATRYBUTY PODAJEMY TYLKO Z __init__, czy ze wszystkich method 
