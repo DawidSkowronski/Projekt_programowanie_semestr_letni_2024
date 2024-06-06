@@ -40,6 +40,9 @@ wyjdź = pygame.image.load(os.path.join("images","wyjdź.jpg"))
 włączony = pygame.image.load(os.path.join("images","włączony.jpg"))
 wyłączony = pygame.image.load(os.path.join("images","wyłączony.jpg"))
 
+jak_grać = pygame.image.load(os.path.join("images","jak.jpg"))
+instrukcja = pygame.image.load(os.path.join("images","instrukcja.jpg"))
+
 # DŹWIĘKI
 dźwięk_strzału = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 dźwięk_wróg1 = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
@@ -86,7 +89,7 @@ class Gracz(Byt):
     szer = statek.get_width()
     wys = statek.get_height()
     speed = 10
-    dx = 0   
+    dx = 0
     dy = 0
 
     def __init__(self):
@@ -121,7 +124,7 @@ class Gracz(Byt):
         
         # GRACZ NIE MOŻE WYJŚĆ ZA OKIENKO
         # NIE MOŻE WYJŚĆ Z LEWEJ ANI Z PRAWEJ
-        if self.x <= 0:                                 
+        if self.x <= 0:
             if self.dx < 0:
                 self.x = 0
             else:
@@ -135,7 +138,7 @@ class Gracz(Byt):
             self.x += self.dx
 
         # NIE MOŻE WYJŚĆ Z GÓRY ANI Z DOŁU
-        if self.y <= OKNO_WYS*2//3:                     
+        if self.y <= OKNO_WYS*2//3:
             if self.dy < 0:
                 self.y = OKNO_WYS*2//3
             else:
@@ -172,7 +175,7 @@ class Scoreboard():
             os.mkdir('.\pliki')
         except:
             print("Katalog już istnieje")
-        try: 
+        try:
             with open(os.path.join("pliki","rekord.txt"), 'r') as rekord:
                 self.highscore = int(rekord.read())
         except:
@@ -259,7 +262,7 @@ class Przeciwnik(Byt):
         else:
             okienko.blit(self.ship_img,(self.x,self.y))
         if self.pozaOknem1():
-            print("PRZECIWNIK USUNIĘTY")
+            #print("PRZECIWNIK USUNIĘTY")
             enemyDoUsunięcia.append(self)
 
     def ruchPrzeciwnika(self):
@@ -339,7 +342,7 @@ gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 
 ##
 ##  ZDARZENIA
-## 
+##
 
 # pojawia przeciwnika co jakiś czas
 cykl_pojawienia_przeciwnika = 1000 #(milisekundy)
@@ -380,12 +383,26 @@ WYJDŹ = Przycisk(200, 200, wyjdź)
 menu = True
 START = Przycisk(0, 0, start)
 EXIT = Przycisk(450, 0, exit)
-
+INSTRUKCJA = Przycisk(0, 500, instrukcja)
 dźwięk = True
+czy_instrukcja = False
 
 while menu:
+    while czy_instrukcja:
+        okienko.blit(jak_grać, (0, 0))
+        INSTRUKCJA.RysujPrzycisk()
+        pygame.display.update()
+        for zdarzenie in pygame.event.get():
+            if zdarzenie.type == pygame.QUIT:
+                graj = False
+                menu = False
+                czy_instrukcja = False
+            elif (zdarzenie.type == pygame.KEYDOWN and zdarzenie.key == pygame.K_ESCAPE) or (zdarzenie.type == pygame.MOUSEBUTTONUP and INSTRUKCJA.CzyMyszka()):
+                czy_instrukcja = False
+    okienko.fill('black')
     START.RysujPrzycisk()
     EXIT.RysujPrzycisk()
+    INSTRUKCJA.RysujPrzycisk()
     if dźwięk:
         DŹWIĘK = Przycisk(400, 200, włączony)
     else:
@@ -393,7 +410,10 @@ while menu:
     DŹWIĘK.RysujPrzycisk()
     pygame.display.update()
     for zdarzenie in pygame.event.get():
-        if zdarzenie.type == pygame.KEYDOWN:
+        if zdarzenie.type == pygame.QUIT:
+            graj = False
+            menu = False
+        elif zdarzenie.type == pygame.KEYDOWN:
             if zdarzenie.key == pygame.K_LSHIFT: # chciałem enter ale nie działa
                 graj = True
                 if dźwięk: pygame.mixer.music.play(-1, 0)
@@ -411,6 +431,8 @@ while menu:
                 graj = False
             elif DŹWIĘK.CzyMyszka():
                 dźwięk = not dźwięk
+            elif INSTRUKCJA.CzyMyszka():
+                czy_instrukcja = True
 
 while graj:
     for zdarzenie in pygame.event.get():
@@ -439,6 +461,8 @@ while graj:
         WYJDŹ.RysujPrzycisk()
         pygame.display.update() # to ważne, nie usuwać
         for zdarzenie in pygame.event.get():
+            if zdarzenie.type == pygame.QUIT:
+                graj = False
             if zdarzenie.type == pygame.KEYDOWN:
                 if zdarzenie.key == pygame.K_LSHIFT: # chciałem enter ale nie działa
                     pygame.mixer.music.set_volume(.25)
@@ -459,7 +483,7 @@ while graj:
     okienko.blit(TŁO, (0,0))
     czas_od_pocisku += dt
     czas_płynny_ruch_przeciwnika += dt/17
-    print(czas_płynny_ruch_przeciwnika)
+    #print(czas_płynny_ruch_przeciwnika)
 
     if gracz.wystrzelPocisk(keys):
         czas_od_pocisku = 0

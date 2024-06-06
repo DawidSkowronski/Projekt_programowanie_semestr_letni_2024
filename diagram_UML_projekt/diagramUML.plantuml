@@ -1,15 +1,23 @@
-@startuml
+@startuml diagramUML
 
 class Byt{
 x
-y    
+y
 --
 __init__(self, x, y)
 }
 
+class Przycisk {
+    image
+    --
+    __init__(self, x, y)
+    RysujPrzycisk(self)
+    CzyMyszka(self)
+}
+
 class Gracz {
     {static} cooldown = 125
-    {static} szer 
+    {static} szer
     {static} wys
     {static} speed = 10
     {static} dx = 0
@@ -108,7 +116,7 @@ Gracz --|> Byt
 Przeciwnik --|> Byt
 Pocisk --|> Byt
 Bariera --|> Byt
-
+Przycisk --|> Byt
 @enduml
 
 #WĄTPLIWOŚĆI
