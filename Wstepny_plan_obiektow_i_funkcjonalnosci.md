@@ -5,7 +5,8 @@ OBIEKT -> CO ROBI/ CO MOŻNA Z NIM ZROBIĆ  * UWAGI/ ULEPSZENIA
 statek gracza 
 -> ruch (lewo, prawo), strzał, zmiana uzbrojenia (czerwone, niebieskie, zielone) 
 * statek może strzlać różnymi pociskami, dany pocisk działa tylko na dany typ wroga
-* wygląd statku może zależeć od ulepszeń
+* wygląd statku może zależeć od otrzymanych obrażeń
+*
 
 wrogie statki 
 -> ruch (w dół), strzał z działa (być może poprzedzony jakąś animacją) 

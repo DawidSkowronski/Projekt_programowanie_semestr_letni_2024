@@ -1,0 +1,85 @@
+SPACE INVADERS W BARDZIEJ MATEMATYCZNYM WYDANIU
+
+OBIEKT -> CO ROBI/ CO MOŻNA Z NIM ZROBIĆ  * UWAGI/ ULEPSZENIA
+
+statek gracza 
+-> ruch (lewo, prawo, góra, dół), strzał (możliwa zmiana uzbrojenia)
+-> statek może poruszać się tylko po określonym obszarze
+-> statek wchodzi w kolizję z pociskami przeciwników i statkami przeciwników
+-> posiada pasek przegrzania się broni po prawej stronie, podąża on za statkiem gracza
+* statek może strzelać różnymi pociskami (podstawowe pociski/ rakiety)
+* wygląd statku może zależeć od uszkodzeń
+
+wrogie statki 
+-> ruch (w dół, bądź po pewnej krzywej), strzał z działa (różny w zależności od przeciwnika)
+-> różne typy przeciwników, różnią się prędkością poruszania, wytrzymałością, zadawanymi obrażeniami, rozmiarem
+-> gdy statek znajdzie się w pobliżu gracza to robi eksploduje,(*jeśli trafi w barierę to uszkadza ją)
+-> ilość zdrowia zależy od typu przeciwnika
+-> typ przeciwnika zależny od modulo danej liczby, np. mocniejszy przeciwnik tworzy się co modulo 10
+
+bariery (na dole mapy)
+-> blokują pocisk przeciwnika
+-> chronią statek gracza
+-> gdy kolizja z pociskiem przeciwnika lub statkiem przeciwnika, to ulegają uszkodzeniu
+
+pociski gracza      
+-> kierunek pocisku
+-> prędkość pocisku
+-> moc pocisku
+-> wielkość pocisku
+-> czy napotkał cel (wróg)
+* dodaje ładunek do paska przegrzewania broni
+
+pociski wroga
+-> kierunek pocisku
+-> prędkość pocisku
+-> moc pocisku
+-> wielkość pocisku
+-> czy napotkał cel (gracz/bariera)
+
+eksplozja 
+-> animacja rysująca się po kolizji statku wroga z graczem lub po utracie wszystkich punktów wytrzymałości przez przeciwnika
+-> rozmiar eksplozji zależy od typu przeciwnika
+
+dźwięk i muzyka
+-> dźwięk wystrzału (zarówno gracza jak i przeciwnika)
+-> możliwość wyciszenia dźwięków
+-> dźwięk eksplozji
+* muzyka podczas gry (może się zmieniać gdy gracz aktywuje ulepszenie)
+
+ulepszenia (modyfikatory)
+-> mogą dryfować po planszy
+-> efekty dźwiękowe i wizualne, gdy gracz je podniesie (zestrzeli)
+-> typy ulepszeń - zwiększone obrażenia strzału, większa szybkostrzelność, przywrócenie życia
+* ulepszenia mogą być tymczasowe albo trwałe 
+
+pasek przegrzania się broni
+-> każdy wystrzał pocisku gracza dodaje ładunek do paska
+-> jeśli pasek się zapełni to gracz nie może wykonać strzału przez określony czas (dopóki wskaźnik się nie wyzeruje)
+-> jeśli gracz przestanie strzelać to po chwilii wskaźnik zacznie się zmniejszać
+
+życie gracza
+-> gracz ma określoną ilość zdrowia (zwizualizowane poprzez pasek w lewym dolnym rogu)
+-> koniec gry, gdy pasek zdrowia dojdzie do 0
+-> efekty dźwiękowe i wizualne, gdy zginie
+
+punkty
+-> za zabicie przeciwnika gracz otrzymuje punkty,
+-> gdy przeciwnik wleci w gracza lub go trafi to odejmowane są punkty,
+-> pokazuje również największy uzyskany wynik
+
+pauza
+-> podczas gry po wciśnięciu esc gra zatrzymuje się (można ją wznowić lub wyjść po wciśnięciu odpowiedniego przycisku)
+
+menu
+->posiada przyciski, dzięki którym można rozpocząć grę, wyciszyć dźwięki, odpalić instrukcję albo wyjść z gry
+
+
+
+
+
+
+HISTORIA (kiczowata)
+-zły Cauchy chce zmienić Epsilon na ujemny we wszystkich twierdzeniach. Przez co cała matematyka ległaby w gruzach. Na szczęście drużyna inżynierów ..., przyszłych inżynierów postanawia dołączyć się do defensywy. Niestety, stwierdzili że PI to około 3, przez co systemy nawigacyjne ich statku zostały źle skalibrowane i ruszyli sami na całą armię obcych.
+
+
