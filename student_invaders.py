@@ -1,5 +1,4 @@
 import pygame
-import time
 import random
 import os
 import math
@@ -12,53 +11,58 @@ pygame.init()
 # GŁÓWNE
 OKNO_SZER = 1200
 OKNO_WYS = 700
-TŁO = pygame.image.load(os.path.join("images","kosmos.png"))
-GAME_OVER = pygame.image.load(os.path.join("images","game_over.png"))
-PAUZA = pygame.image.load(os.path.join("images","pauza.png"))
 font = pygame.font.Font(None,32)
-FPS = 60
-pauza = False
+fps = 60
 
 # SPRAJTY
 statek = pygame.image.load(os.path.join("images","statek.png"))
-wróg = pygame.image.load(os.path.join("images","kosmita.png"))
-wróg_obrażenia1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png"))
-wróg_obrażenia2 = pygame.image.load(os.path.join("images","kosmita_dmg2.png"))
-wróg2 = pygame.image.load(os.path.join("images","przeciwnik2.png")) 
-wróg2_obrażenia1 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png"))
-wróg2_obrażenia2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png"))
+icon = pygame.image.load(os.path.join("images","ic_statek.png"))
+
+kosmita = pygame.image.load(os.path.join("images","kosmita.png"))
+kosmita_1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png"))
+kosmita_2 = pygame.image.load(os.path.join("images","kosmita_dmg2.png"))
+
+krazownik = pygame.image.load(os.path.join("images","przeciwnik2.png")) 
+krazownik_1 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png"))
+krazownik_2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png"))
+
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png"))
-pocisk_wroga1 = pygame.image.load(os.path.join("images","pocisk_wróg1.png"))
-pocisk_wroga2 = pygame.image.load(os.path.join("images","pocisk2.png"))
+pocisk_kosmity = pygame.image.load(os.path.join("images","pocisk_wróg1.png"))
+pocisk_krazownika = pygame.image.load(os.path.join("images","pocisk2.png"))
 
-start = pygame.image.load(os.path.join("images","START.png"))
-start1 = pygame.image.load(os.path.join("images","START1.png"))
-exit = pygame.image.load(os.path.join("images","EXIT.png"))
-exit1 = pygame.image.load(os.path.join("images","EXIT1.png"))
+but_start = pygame.image.load(os.path.join("images","START.png"))
+but_start_hover = pygame.image.load(os.path.join("images","START1.png"))
+but_wyjscie = pygame.image.load(os.path.join("images","EXIT.png"))
+but_wyjscie_hover = pygame.image.load(os.path.join("images","EXIT1.png"))
+but_kontynuuj = pygame.image.load(os.path.join("images","kontynuuj.jpg"))
+but_kontynuuj_hover = pygame.image.load(os.path.join("images","kontynuuj1.jpg"))
 
-wznów = pygame.image.load(os.path.join("images","kontynuuj.jpg"))
-wznów1 = pygame.image.load(os.path.join("images","kontynuuj1.jpg"))
-wyjdź = pygame.image.load(os.path.join("images","wyjdź.jpg"))
-wyjdź1 = pygame.image.load(os.path.join("images","wyjdź1.jpg"))
+but_dzwiek_enabled = pygame.image.load(os.path.join("images","włączony.jpg"))
+but_dzwiek_enabled_hover = pygame.image.load(os.path.join("images","włączony1.jpg"))
+but_dzwiek_disabled = pygame.image.load(os.path.join("images","wyłączony.jpg"))
+but_dzwiek_disabled_hover = pygame.image.load(os.path.join("images","wyłączony1.jpg"))
 
-włączony = pygame.image.load(os.path.join("images","włączony.jpg"))
-włączony1 = pygame.image.load(os.path.join("images","włączony1.jpg"))
-wyłączony = pygame.image.load(os.path.join("images","wyłączony.jpg"))
-wyłączony1 = pygame.image.load(os.path.join("images","wyłączony1.jpg"))
+but_instrukcje = pygame.image.load(os.path.join("images","instrukcja.jpg"))
+but_instrukcje_hover = pygame.image.load(os.path.join("images","instrukcja1.jpg"))
 
-jak_grać = pygame.image.load(os.path.join("images","jak.jpg"))
-instrukcja = pygame.image.load(os.path.join("images","instrukcja.jpg"))
-instrukcja1 = pygame.image.load(os.path.join("images","instrukcja1.jpg"))
+bg_instrukcje = pygame.image.load(os.path.join("images","jak.jpg"))
+bg_kosmos = pygame.image.load(os.path.join("images","kosmos.png"))
+bg_gameover = pygame.image.load(os.path.join("images","game_over.png"))
+bg_pauza = pygame.image.load(os.path.join("images","pauza.png"))
 
 # DŹWIĘKI
-dźwięk_strzału = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
-dźwięk_wróg1 = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
-dźwięk_strzału.set_volume(.1)
 pygame.mixer.init()
 
-game_over = os.path.join("music","game_over.mp3")
-muza = os.path.join("music","muza.mp3")
-pygame.mixer.music.load(muza)
+# SFX
+sfx_pocisk = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
+sfx_pocisk_wroga = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
+sfx_pocisk.set_volume(.1)
+
+# MUZYKA
+mus_gameover = os.path.join("music","game_over.mp3")
+mus_gra = os.path.join("music","muza.mp3")
+
+pygame.mixer.music.load(mus_gra)
 pygame.mixer.music.set_volume(.25)
 #pygame.mixer.music.play(-1, 0)
 
@@ -69,77 +73,71 @@ pygame.mixer.music.set_volume(.25)
 # KLASA BYTU
 class Byt:
     """Klasa tworząca byt w grze."""
-    def __init__(self, x, y):
+    def __init__(self, x:float, y:float, mask, obrazek:pygame.Surface = None):
         self.x = x
         self.y = y
+        self.mask = mask
+        self.obrazek = obrazek
 
 # KLASA PRZYCISK
 class Przycisk(Byt):
     """Klasa zawierająca funkcjonalność przycisków"""
-    def __init__(self, x, y, image, image1):
-        self.image = image
-        self.image1 = image1
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-    
-    #def RysujPrzycisk(self):
-     #   """Ustawia dany przycisk na odpowiednie miejsce"""
-      #  if Przycisk.CzyMyszka(self):
-       #     okienko.blit(self.image1, (self.rect.x, self.rect.y))
-        #else:
-        #   okienko.blit(self.image, (self.rect.x, self.rect.y))
-    
+    def __init__(self, x, y, but_obrazek:pygame.Surface, but_obrazek_hover:pygame.Surface = None):
+        Byt.__init__(self, x, y, but_obrazek.get_rect(), but_obrazek)
+
+        self.mask.topleft = (x, y)
+        self.obrazek_hover = but_obrazek_hover
+
     def czyMyszka(self):
-        """Sprawdza, czy myszka jest "na powierzchni" przycisku"""
+        """Sprawdza, czy myszka jest "na powierzchni" przycisku, zwraca bool."""
         myszka = pygame.mouse.get_pos()
-        if self.rect.collidepoint(myszka):
+        if self.mask.collidepoint(myszka):
             return True
         return False
     
     def rysujPrzycisk(self):
-        """Sprawdza, czy myszka jest "na powierzchni" przycisku i wyświetla odpowiedni obraz"""
+        """Wyświetla przycisk w okienku."""
         if self.czyMyszka():
-            okienko.blit(self.image1, (self.rect.x, self.rect.y))
+            okienko.blit(self.obrazek_hover, (self.mask.x, self.mask.y))
         else:
-            okienko.blit(self.image, (self.rect.x, self.rect.y))
+            okienko.blit(self.obrazek, (self.mask.x, self.mask.y))
 
 # KLASA GRACZ
 class Gracz(Byt):
     """Klasa zawierająca funkcjonalność i anatomię gracza."""
-    cooldown = 125
-    szer = statek.get_width()
-    wys = statek.get_height()
-    speed = 10
-    dx = 0
-    dy = 0
+    cooldown_strzalu = 125
 
     def __init__(self):
-        Byt.__init__(self, 0, 0)
-        self.ship_img = statek
-        self.mask = pygame.mask.from_surface(self.ship_img)
+        mask = pygame.mask.from_surface(statek)
+        Byt.__init__(self, 0, 0, mask, statek)
+        self.szer = self.obrazek.get_width()
+        self.wys = self.obrazek.get_height()
+        self.dx = 0
+        self.dy = 0
+        self.predkosc = 10
 
     def ustawGracza(self, x, y):
         """Ustawia gracza na konkretne koordynaty."""
         self.x = x
         self.y = y
 
-    def rysujGracza(self, okienko):
+    def rysujGracza(self):
         """Rysuje instancję gracza."""
-        okienko.blit(statek,(self.x,self.y))
+        okienko.blit(self.obrazek, (self.x,self.y))
 
-    def przesuńGracza(self, keys):
+    def przesuńGracza(self):
         """Zmienia koordynaty gracza."""
         if keys[pygame.K_w]:
-            self.dy = -self.speed
+            self.dy = -self.predkosc
         elif keys[pygame.K_s]:
-            self.dy = self.speed
+            self.dy = self.predkosc
         else:
             self.dy = 0
 
         if keys[pygame.K_a]:
-            self.dx = -self.speed
+            self.dx = -self.predkosc
         elif keys[pygame.K_d]:
-            self.dx = self.speed
+            self.dx = self.predkosc
         else:
             self.dx = 0
         
@@ -172,51 +170,48 @@ class Gracz(Byt):
         else:
             self.y += self.dy
 
-    def wystrzelPocisk(self, keys):
+    def wystrzelPocisk(self):
         """Pozwala graczowi wystrzelić pocisk, zwraca prawdę jeśli go wystrzeli."""
-        if czas_od_pocisku > Gracz.cooldown:
+        if czas_od_pocisku > Gracz.cooldown_strzalu:
             if keys[pygame.K_SPACE]:
                 pociskList.append(Pocisk(self.x + self.szer//2 - 10, self.y + self.wys//2, 25, "gracz"))
                 pociskList.append(Pocisk(self.x + self.szer//2 + 10, self.y + self.wys//2, 25, "gracz"))
-                if dźwięk: dźwięk_strzału.play()
+                if dźwięk: 
+                    sfx_pocisk.play()
                 return True
         return False
-
-    # def czy_trafił(self, obiekt):
-    #     """Sprawdza, czy wystrzelony pocisk trafił w coś."""
-    #     for pocisk in pociskList:
-    #         if pocisk.czy_kolizja(obiekt):
-    #             pociskList.remove(pocisk)
 
 # KLASA PUNKTY GRACZA
 class Scoreboard():
     def __init__(self):
-        self.score = 0
+        self.wynik = 0
         try:
             os.mkdir('.\pliki')
         except:
             print("Katalog już istnieje")
         try:
             with open(os.path.join("pliki","rekord.txt"), 'r') as rekord:
-                self.highscore = int(rekord.read())
+                self.rekord = int(rekord.read())
         except:
             with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
                 rekord.write(str(0))
-                self.highscore = 0
-        print(self.highscore)
+                self.rekord = 0
+        print(self.rekord)
     
-    def dodawanie_punktów(self,wartość):
-        self.score += wartość
+    def dodawaniePunktów(self,wartość):
+        """Dodaje punkty do wyniku."""
+        self.wynik += wartość
     
-    def rysuj_scoreboard(self,surface):
-        okienko.blit(font.render("Score: " + str(self.score),True,(255,255,255)),(0,0))
-        if self.highscore < self.score:
-                okienko.blit(font.render("NEW HIGHSCORE: " + str(self.score),True,(0, 200, 0)),(0,20))
+    def rysujScoreboard(self):
+        """Pojawia na ekranie wynik razem z rekordem."""
+        okienko.blit(font.render("Wynik: " + str(self.wynik),True,(255,255,255)),(0,0))
+        if self.rekord < self.wynik:
+            okienko.blit(font.render("NOWY REKORD: " + str(self.wynik),True,(0, 200, 0)),(0,20))
         else:
-            okienko.blit(font.render("Highscore: " + str(self.highscore),True,(255, 255, 255)),(0,20))
-        if zdrowie.hp <= 0 and self.highscore < self.score:
+            okienko.blit(font.render("Rekord: " + str(self.rekord),True,(255, 255, 255)),(0,20))
+        if zdrowie.hp <= 0 and self.rekord < self.wynik:
             with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
-                rekord.write(str(self.score))
+                rekord.write(str(self.wynik))
 
 # KLASA ŻYCIE GRACZA
 class PasekZdrowia():
@@ -224,71 +219,73 @@ class PasekZdrowia():
         self.hp = max_hp
         self.max_hp = max_hp
 
-    def rysuj_pasek(self, surface):
+    def rysujPasek(self):
+        """Pojawia pasek zdrowia na ekranie."""
         poziom_hp = self.hp / self.max_hp
-        pygame.draw.rect(surface, "red", (10, 660, 300, 30))
-        pygame.draw.rect(surface, "green", (10, 660, 300 * poziom_hp, 30))
+        pygame.draw.rect(okienko, "red", (10, 660, 300, 30))
+        pygame.draw.rect(okienko, "green", (10, 660, 300 * poziom_hp, 30))
         okienko.blit(font.render("HP",True,'green'),(140,630))
         
-    def zmiana_hp(self, wartość):
-        if self.hp + wartość >=  self.max_hp:
+    def zmianaHp(self, wartosc:float):
+        """Zmienia hp na zadaną wartość."""
+        if self.hp + wartosc >=  self.max_hp:
             self.hp = self.max_hp
-        elif self.hp + wartość < 0:
+        elif self.hp + wartosc < 0:
             self.hp = 0
         else:
-            self.hp += wartość
+            self.hp += wartosc
 
 # KLASA PRZECIWNIK
 class Przeciwnik(Byt):
-    stworzonychPrzeciwników = 0
+    stworzonych_przeciwnikow = 0
 
     dx = 0
     dy = 0
 
-    def __init__(self):
-        Byt.__init__(self, 0, 0)
-
+    def __init__(self, x:float = 0, y:float = 0):
         # ID PRZECIWNIKA
-        self.id = Przeciwnik.stworzonychPrzeciwników
-        Przeciwnik.stworzonychPrzeciwników += 1
-        self.offset = czas_płynny_ruch_przeciwnika
+        self.id = Przeciwnik.stworzonych_przeciwnikow
+        Przeciwnik.stworzonych_przeciwnikow += 1
+        self.ruch_offset = czas_płynny_ruch_przeciwnika
 
-        if Przeciwnik.stworzonychPrzeciwników % 10 == 0:
-            self.tag = "wróg2"
-            self.ship_img = wróg2
-            self.ship_img2 = wróg2_obrażenia1
-            self.ship_img3 = wróg2_obrażenia2
+        if Przeciwnik.stworzonych_przeciwnikow % 10 == 0:
+            self.tag = "krążownik"
+            self.obraz = krazownik
+            self.obraz_1 = krazownik_1
+            self.obraz_2 = krazownik_2
             self.speed = 1
             self.pocisk_speed = 5
             self.hp = 7
         else:
-            self.tag = "wróg1"
-            self.ship_img = wróg
-            self.ship_img2 = wróg_obrażenia1
-            self.ship_img3 = wróg_obrażenia2
+            self.tag = "kosmita"
+            self.obraz = kosmita
+            self.obraz_1 = kosmita_1
+            self.obraz_2 = kosmita_2
             self.speed = 3
             self.pocisk_speed = 10
             self.hp = 5
 
-        self.szer = self.ship_img.get_width()
-        self.wys = self.ship_img.get_width()
-        self.mask = pygame.mask.from_surface(self.ship_img)
+        mask = pygame.mask.from_surface(self.obraz)
+        Byt.__init__(self, x, y, mask, self.obraz)
+        
+        self.szer = self.obrazek.get_width()
+        self.wys = self.obrazek.get_width()
     
     def rysujPrzeciwnika(self):
         """Rysuje instancję przeciwnika."""
         if self.hp <= 2:
-            okienko.blit(self.ship_img3,(self.x,self.y))
+            okienko.blit(self.obraz_2,(self.x,self.y))
         elif self.hp <= 4:
-            okienko.blit(self.ship_img2,(self.x,self.y))
+            okienko.blit(self.obraz_1,(self.x,self.y))
         else:
-            okienko.blit(self.ship_img,(self.x,self.y))
-        if self.pozaOknem1():
+            okienko.blit(self.obraz,(self.x,self.y))
+        if self.pozaOknem():
             #print("PRZECIWNIK USUNIĘTY")
-            enemyDoUsunięcia.append(self)
+            enemy_do_usunięcia.append(self)
 
     def ruchPrzeciwnika(self):
         """Zmienia koordynaty przeciwnika."""
-        self.dy = self.speed * abs(math.sin(2*czas_płynny_ruch_przeciwnika/FPS + self.offset%FPS)) + .5
+        self.dy = self.speed * abs(math.sin(2*czas_płynny_ruch_przeciwnika/fps + self.ruch_offset%fps)) + .5
 
         self.y += self.dy
 
@@ -297,13 +294,13 @@ class Przeciwnik(Byt):
         self.x = x
         self.y = y
 
-    def wystrzelPocisk1(self):
+    def wystrzelPocisk(self):
         """Pozwala przeciwnikowi wystrzelić pocisk"""
         pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, self.pocisk_speed, self.tag))
         #if dźwięk: dźwięk_wróg1.play()
         return True
     
-    def pozaOknem1(self):    # usuwamy przeciwników poza oknem, żeby nie zostawiać zbędnych obiektów
+    def pozaOknem(self):    # usuwamy przeciwników poza oknem, żeby nie zostawiać zbędnych obiektów
         """Sprawdza, czy przeciwnik znajduje się w obszarze okna, jeśli nie -  usuwa go."""
         if self.y > OKNO_WYS + 5:
             return True
@@ -311,32 +308,32 @@ class Przeciwnik(Byt):
 
 # KLASA POCISK
 class Pocisk(Byt):
-    def __init__(self, x, y, speed, ktoStrzelił):
-        if ktoStrzelił == "gracz":
-            self.img = pocisk_gracza
-        if ktoStrzelił == "wróg1":
-            self.img = pocisk_wroga1
-        if ktoStrzelił == "wróg2":
-            self.img = pocisk_wroga2
+    def __init__(self, x:float, y:float, predkosc:float, kto_strzelił:str):
+        if kto_strzelił == "gracz":
+            obrazek = pocisk_gracza
+        if kto_strzelił == "kosmita":
+            obrazek = pocisk_kosmity
+        if kto_strzelił == "krążownik":
+            obrazek = pocisk_krazownika
 
-        self.mask = pygame.mask.from_surface(self.img)  # mask tworzy dokładną siatkę pikseli wgranego obrazu
+        mask = pygame.mask.from_surface(obrazek)  # mask tworzy dokładną siatkę pikseli wgranego obrazu
 
-        Byt.__init__(self, x - self.img.get_width()//2, y - self.img.get_height()//2)
-        self.speed = speed
-        self.ktoStrzelił = ktoStrzelił
+        Byt.__init__(self, x - obrazek.get_width()//2, y - obrazek.get_height()//2, mask, obrazek)
+        self.predkosc = predkosc
+        self.kto_strzelił = kto_strzelił
     
     def rysujPocisk(self):
         """Rysuje pocisk."""
-        okienko.blit(self.img, (self.x, self.y))  # rysuje obraz na wyświetlanym oknie
+        okienko.blit(self.obrazek, (self.x, self.y))  # rysuje obraz na wyświetlanym oknie
         if self.pozaOknem():
-            pociskiDoUsunięcia.append(self)
+            pociski_do_usunięcia.append(self)
         
     def ruchPocisku(self):
         """Przemieszcza pocisk."""
-        if self.ktoStrzelił == "gracz":
-            self.y -= self.speed  # pocisk porusza się pionowo do góry (gracz)
+        if self.kto_strzelił == "gracz":
+            self.y -= self.predkosc  # pocisk porusza się pionowo do góry (gracz)
         else:
-            self.y += self.speed # pocisk porusza się pionowo do dołu (wrogowie)
+            self.y += self.predkosc # pocisk porusza się pionowo do dołu (wrog1)
     
     def pozaOknem(self):    # usuwamy pociski poza oknem, żeby nie zostawiać zbędnych obiektów
         """Sprawdza, czy pocisk znajduje się w obszarze okna."""
@@ -347,28 +344,28 @@ class Pocisk(Byt):
         return czy_poza_oknem
         #Czy nie łatwiej usunąć zmienną czy_poza_oknem i po prostu odpowiednio zwracać True lub False?
     
-    def czy_kolizja(self, obiekt):
+    def czyKolizja(self, obiekt):
         """Sprawdza, czy następuje kolizja między pociskiem a obiektem."""
         return kolizja(self, obiekt)
 
 # KLASA SCENA
 class Scena():
-    obecnaScena = None
+    obecna_scena = None
 
-    def __init__(self, tag, przyciski = []):
+    def __init__(self, tag:str, przyciski:list[Przycisk] = []):
         self.tag = tag
         self.przyciski = przyciski
 
     def rysujPrzyciski(self):
         for przycisk in self.przyciski:
             przycisk.rysujPrzycisk()
+
 ##
 ##      OBIEKTY
 ##
 
 punkty = Scoreboard()
 zdrowie = PasekZdrowia(100)
-
 gracz = Gracz()
 gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 
@@ -377,25 +374,26 @@ gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 ##
 
 # pojawia przeciwnika co jakiś czas
-cykl_pojawienia_przeciwnika = 1000 #(milisekundy)
+cykl_pojawienia_przeciwnika = 1000 #(milisekundy) <----------- TUTAJ BYM COŚ PRZEROBIŁ JAKOŚ ***************
 pojaw_przeciwnika = pygame.USEREVENT
 pygame.time.set_timer(pojaw_przeciwnika, cykl_pojawienia_przeciwnika)
 
-# przeciwnik będzie strzelał co jakiś czas (niewykorzystane)
-cykl_strzał_wróg1 = 200
-strzał_wróg1 = pygame.USEREVENT + 1
-pygame.time.set_timer(strzał_wróg1, cykl_strzał_wróg1)
+# # przeciwnik będzie strzelał co jakiś czas (niewykorzystane)
+# cykl_strzał_wróg1 = 200
+# strzał_wróg1 = pygame.USEREVENT + 1
+# pygame.time.set_timer(strzał_wróg1, cykl_strzał_wróg1)
 
 ##*************************##
 ##           GRA           ##
 ##*************************##
+
+pygame.display.set_icon(icon)
 okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
-podział_okienka = range(0, OKNO_SZER - wróg.get_width(), wróg.get_width())
+podział_okienka = range(0, OKNO_SZER - kosmita.get_width(), kosmita.get_width())
 pygame.display.set_caption("Student Invaders")
-pygame.display.set_icon(statek)
 zegarek = pygame.time.Clock()
 
-#   LISTY
+# LISTY
 enemyList = list[Przeciwnik]()          # lista przeciwników
 pociskList = list[Pocisk]()             # lista pocisków
 
@@ -409,33 +407,38 @@ def kolizja(obiekt1, obiekt2):
     ramka_y = obiekt2.y - obiekt1.y
     return obiekt1.mask.overlap(obiekt2.mask, (ramka_x, ramka_y)) != None
 
-WZNÓW = Przycisk(0, 200, wznów, wznów1)
-WYJDŹ = Przycisk(200, 200, wyjdź, wyjdź1)
-START = Przycisk(0, 0, start, start1)
-EXIT = Przycisk(450, 0, exit, exit1)
-INSTRUKCJA = Przycisk(0, 500, instrukcja, instrukcja1)
 
-MENU_PONOWNIE = Przycisk(0, 0, włączony, włączony1)
-WYJDŹ_PONOWNIE = Przycisk(0, 400, wyjdź, wyjdź1)
-GRAJ_PONOWNIE = Przycisk(400, 0, start, start1)
-
+# PRZYCISKI
+WZNÓW = Przycisk(0, 200, but_kontynuuj, but_kontynuuj_hover)
+WYJDŹ = Przycisk(200, 200, but_wyjscie, but_wyjscie_hover)
+START = Przycisk(0, 0, but_start, but_start_hover)
+EXIT = Przycisk(450, 0, but_wyjscie, but_wyjscie_hover)
+INSTRUKCJA = Przycisk(0, 500, but_instrukcje, but_instrukcje_hover)
+DŹWIĘK_ON = Przycisk(450, 500, but_dzwiek_enabled, but_dzwiek_enabled_hover)
+DŹWIĘK_OFF = Przycisk(450, 500, but_dzwiek_disabled, but_dzwiek_disabled_hover)
+DŹWIĘKI=[DŹWIĘK_ON, DŹWIĘK_OFF]
+DŹWIĘK = DŹWIĘK_ON
 dźwięk = True
-czy_instrukcja = False
-śmierć = False
 
+MENU_PONOWNIE = Przycisk(0, 0, but_dzwiek_enabled, but_dzwiek_enabled_hover)
+WYJDŹ_PONOWNIE = Przycisk(0, 400, but_wyjscie, but_wyjscie_hover)
+GRAJ_PONOWNIE = Przycisk(400, 0, but_start, but_start_hover)
+
+# SCENY
 SCENA_MENU = Scena("MENU", [START, INSTRUKCJA, EXIT])
 SCENA_GRA = Scena("GRA")
 SCENA_INSTRUKCJE = Scena("INSTRUKCJE", [INSTRUKCJA])
 SCENA_PAUZA = Scena("PAUZA", [WZNÓW, WYJDŹ])
-SCENA_ŚMIERĆ = Scena("ŚMIERĆ")
+SCENA_ŚMIERĆ = Scena("ŚMIERĆ", [MENU_PONOWNIE, WYJDŹ_PONOWNIE, GRAJ_PONOWNIE])
 
-Scena.obecnaScena = SCENA_MENU
+Scena.obecna_scena = SCENA_MENU
 
-scena : Scena
+# GRA
+scena : Scena = Scena.obecna_scena
 graj = True
 while graj:
-    scena = Scena.obecnaScena
-    dt = zegarek.tick(FPS)
+    scena = Scena.obecna_scena
+    dt = zegarek.tick(fps)
     keys = pygame.key.get_pressed()
     pygame.display.update()
 
@@ -447,16 +450,12 @@ while graj:
     
     if scena == SCENA_MENU:
         okienko.fill('black')
-        if dźwięk:
-            DŹWIĘK = Przycisk(450, 500, włączony, włączony1)
-        else:
-            DŹWIĘK = Przycisk(450, 500, wyłączony, wyłączony1)
 
         scena.rysujPrzyciski()
         DŹWIĘK.rysujPrzycisk()
         
         if keys[pygame.K_LSHIFT]:
-            Scena.obecnaScena = SCENA_GRA
+            Scena.obecna_scena = SCENA_GRA
         if keys[pygame.K_ESCAPE]:
             graj = False
 
@@ -465,34 +464,39 @@ while graj:
                 if START.czyMyszka():
                     if dźwięk: 
                         pygame.mixer.music.play(-1, 0)
-                    Scena.obecnaScena = SCENA_GRA
+                    Scena.obecna_scena = SCENA_GRA
                 if EXIT.czyMyszka():
                     graj = False
                 if DŹWIĘK.czyMyszka():
                     dźwięk = not dźwięk
+                    if dźwięk:
+                        DŹWIĘK = DŹWIĘK_ON
+                    else:
+                        DŹWIĘK = DŹWIĘK_OFF
                 if INSTRUKCJA.czyMyszka():
-                    Scena.obecnaScena = SCENA_INSTRUKCJE
+                    Scena.obecna_scena = SCENA_INSTRUKCJE
+
     elif scena == SCENA_INSTRUKCJE:
-        okienko.blit(jak_grać, (0, 0))
+        okienko.blit(bg_instrukcje, (0, 0))
         scena.rysujPrzyciski()
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.KEYDOWN:
                 zdarzenie.key == pygame.K_ESCAPE
-                Scena.obecnaScena = SCENA_MENU
+                Scena.obecna_scena = SCENA_MENU
             if zdarzenie.type == pygame.MOUSEBUTTONUP and INSTRUKCJA.czyMyszka():
-                Scena.obecnaScena = SCENA_MENU
+                Scena.obecna_scena = SCENA_MENU
     elif scena == SCENA_GRA:
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.QUIT:
                 graj = False
-            if zdarzenie.type == pojaw_przeciwnika and pauza is False: #pauza is False po to, aby przeciwnicy nie generowali się w trakcie pauzy
+            if zdarzenie.type == pojaw_przeciwnika: #pauza is False po to, aby przeciwnicy nie generowali się w trakcie pauzy
                 przeciwnik = Przeciwnik()
                 gdzie_przeciwnik = random.choice(podział_okienka)
                 przeciwnik.ustawPrzeciwnika(gdzie_przeciwnik, - przeciwnik.wys - 2)
                 enemyList.append(przeciwnik)
             if zdarzenie.type == pygame.KEYDOWN:
                 if zdarzenie.key == pygame.K_ESCAPE:
-                    Scena.obecnaScena = SCENA_PAUZA
+                    Scena.obecna_scena = SCENA_PAUZA
                     pygame.mixer.music.set_volume(.03)
                 elif zdarzenie.key == pygame.K_c:
                     print(pygame.time.get_ticks())
@@ -503,80 +507,72 @@ while graj:
             #         random.choice(enemyList).wystrzelPocisk1()
                    
         # WYKONUJE SIĘ NA KAŻDY TICK
-        okienko.blit(TŁO, (0,0))
+        okienko.blit(bg_kosmos, (0,0))
         czas_od_pocisku += dt
         czas_płynny_ruch_przeciwnika += dt/17
         #print(czas_płynny_ruch_przeciwnika)
 
-        if gracz.wystrzelPocisk(keys):
+        if gracz.wystrzelPocisk():
             czas_od_pocisku = 0
         
         if czas_od_pocisku > 2000:
-            czas_od_pocisku = Gracz.cooldown
+            czas_od_pocisku = Gracz.cooldown_strzalu
         
-        enemyDoUsunięcia = []
+        enemy_do_usunięcia = []
         strzelający_przeciwnik = random.randint(0, 300)
         for enemy in enemyList:
             if enemy.id == strzelający_przeciwnik:
-                enemy.wystrzelPocisk1()
+                enemy.wystrzelPocisk()
             if kolizja(enemy, gracz):
-                enemyDoUsunięcia.append(enemy)
-                punkty.dodawanie_punktów(-100)
-                zdrowie.zmiana_hp(-20)
+                enemy_do_usunięcia.append(enemy)
+                punkty.dodawaniePunktów(-100)
+                zdrowie.zmianaHp(-20)
             enemy.ruchPrzeciwnika()
             enemy.rysujPrzeciwnika()
 
-        pociskiDoUsunięcia = []
+        pociski_do_usunięcia = []
         for pocisk in pociskList:
             pocisk.ruchPocisku()
             pocisk.rysujPocisk()
-            if pocisk.ktoStrzelił == "gracz":
+            if pocisk.kto_strzelił == "gracz":
                 for enemy in enemyList:
-                    if pocisk.czy_kolizja(enemy):
-                        pociskiDoUsunięcia.append(pocisk)
+                    if pocisk.czyKolizja(enemy):
+                        pociski_do_usunięcia.append(pocisk)
                         enemy.hp += -1
                         if enemy.hp == 0:
-                            punkty.dodawanie_punktów(200)
-                            enemyDoUsunięcia.append(enemy)
-            if pocisk.ktoStrzelił in ("wróg1", "wróg2"):
-                if pocisk.czy_kolizja(gracz):
-                    pociskiDoUsunięcia.append(pocisk)
-                    punkty.dodawanie_punktów(-100)
-                    strata = -20 if pocisk.ktoStrzelił == "wróg1" else -40
-                    zdrowie.zmiana_hp(strata)
+                            punkty.dodawaniePunktów(200)
+                            enemy_do_usunięcia.append(enemy)
+            if pocisk.kto_strzelił in ("kosmita", "krążownik"):
+                if pocisk.czyKolizja(gracz):
+                    pociski_do_usunięcia.append(pocisk)
+                    punkty.dodawaniePunktów(-100)
+                    strata = -20 if pocisk.kto_strzelił == "kosmita" else -40
+                    zdrowie.zmianaHp(strata)
                     #^^^^^^^^^^^^^^^^^^
                     #tutaj zrobimy stratę hp zależną od typu przeciwnika (to jak zrobimy klasę typów przeciwnika albo wczytywanie pliku)
 
-        for enemy in enemyDoUsunięcia:
+        for enemy in enemy_do_usunięcia:
             try:
                 enemyList.remove(enemy)
             except:
                 print("Błąd usunięcia przeciwnika.")
-        for pocisk in pociskiDoUsunięcia:
+        for pocisk in pociski_do_usunięcia:
             try:
                 pociskList.remove(pocisk)
             except:
                 print("Błąd usunięcia pocisku.")
 
-        gracz.przesuńGracza(keys)
-        gracz.rysujGracza(okienko)
-        punkty.rysuj_scoreboard(okienko)
-        zdrowie.rysuj_pasek(okienko)
+        gracz.przesuńGracza()
+        gracz.rysujGracza()
+        punkty.rysujScoreboard()
+        zdrowie.rysujPasek()
         
-        if zdrowie.hp <= 0 :
-            pygame.mixer.music.stop()
-            #okienko.blit(GAME_OVER,(0,0))
-            #pygame.display.update()
-            #game_over = pygame.mixer.Sound('./music/game_over.mp3')
-            #muza = pygame.mixer.music.load(os.path.join("music","game_over.mp3"))
-            #if dźwięk:
-            #    pygame.mixer.music.play(-1, 0)
-        # pygame.time.wait(int(game_over.get_length()) * 1000)
-            Scena.obecnaScena = SCENA_ŚMIERĆ
-            pygame.mixer.music.load(game_over)
+        if zdrowie.hp <= 0:
+            Scena.obecna_scena = SCENA_ŚMIERĆ
+            pygame.mixer.music.load(mus_gameover)
             pygame.mixer.music.play()
     elif scena == SCENA_PAUZA:
-        okienko.blit(PAUZA, (0, 0))
+        okienko.blit(bg_pauza, (0, 0))
         scena.rysujPrzyciski()
         pygame.display.update() # to ważne, nie usuwać
         for zdarzenie in zdarzenia:
@@ -585,36 +581,43 @@ while graj:
             if zdarzenie.type == pygame.KEYDOWN:
                 if zdarzenie.key == pygame.K_LSHIFT: # chciałem enter ale nie działa
                     pygame.mixer.music.set_volume(.25)
-                    Scena.obecnaScena = SCENA_GRA
+                    Scena.obecna_scena = SCENA_GRA
                 elif zdarzenie.key == pygame.K_ESCAPE:
                     graj = False
             elif zdarzenie.type == pygame.MOUSEBUTTONDOWN:
                 if WZNÓW.czyMyszka():
                     pygame.mixer.music.set_volume(.25)
-                    Scena.obecnaScena = SCENA_GRA
+                    Scena.obecna_scena = SCENA_GRA
                 elif WYJDŹ.czyMyszka():
                     graj = False
                     pauza = False
     elif scena == SCENA_ŚMIERĆ:
-        okienko.blit(GAME_OVER, (0,0))
-        MENU_PONOWNIE.rysujPrzycisk()
-        WYJDŹ_PONOWNIE.rysujPrzycisk()
-        GRAJ_PONOWNIE.rysujPrzycisk()
+        okienko.blit(bg_gameover, (0,0))
+
+        scena.rysujPrzyciski()
+
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.QUIT:
-                game_over = False
-                żywy = False
                 pygame.mixer.stop()
             if zdarzenie.type == pygame.MOUSEBUTTONUP:
                 if WYJDŹ_PONOWNIE.czyMyszka():
                     pygame.mixer.stop()
                     graj = False
                 elif MENU_PONOWNIE.czyMyszka():
-                    Scena.obecnaScena = SCENA_MENU
+                    Scena.obecna_scena = SCENA_MENU
                     pygame.mixer.stop()
                 elif GRAJ_PONOWNIE.czyMyszka():
-                    Scena.obecnaScena = SCENA_GRA
-                    pygame.mixer.stop()
+                    Scena.obecna_scena = SCENA_GRA
+                    
+                    pygame.mixer.music.stop()
+                    pygame.mixer.music.load(mus_gra)
+                    pygame.mixer.music.play()
+
+                    enemyList = []
+                    pociskList = []
+                    gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
+                    zdrowie.hp = zdrowie.max_hp
+                    punkty = 0
 
 print(pygame.time.get_ticks())
 
