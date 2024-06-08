@@ -55,7 +55,10 @@ dźwięk_strzału = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 dźwięk_wróg1 = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
 dźwięk_strzału.set_volume(.1)
 pygame.mixer.init()
-muza = pygame.mixer.music.load(os.path.join("music","muza.mp3"))
+
+game_over = os.path.join("music","game_over.mp3")
+muza = os.path.join("music","muza.mp3")
+pygame.mixer.music.load(muza)
 pygame.mixer.music.set_volume(.25)
 #pygame.mixer.music.play(-1, 0)
 
@@ -86,21 +89,19 @@ class Przycisk(Byt):
         #else:
         #   okienko.blit(self.image, (self.rect.x, self.rect.y))
     
-    #def CzyMyszka(self):
-     #   """Sprawdza, czy myszka jest "na powierzchni" przycisku"""
-      #  myszka = pygame.mouse.get_pos()
-       # if self.rect.collidepoint(myszka):
-        #    return True
-        #return False
-    
-    def CzyMyszka_i_RysujPrzycisk(self):
-        """Sprawdza, czy myszka jest "na powierzchni" przycisku i wyświetla odpowiedni obraz"""
+    def czyMyszka(self):
+        """Sprawdza, czy myszka jest "na powierzchni" przycisku"""
         myszka = pygame.mouse.get_pos()
         if self.rect.collidepoint(myszka):
-            okienko.blit(self.image1, (self.rect.x, self.rect.y))
             return True
-        okienko.blit(self.image, (self.rect.x, self.rect.y))
         return False
+    
+    def rysujPrzycisk(self):
+        """Sprawdza, czy myszka jest "na powierzchni" przycisku i wyświetla odpowiedni obraz"""
+        if self.czyMyszka():
+            okienko.blit(self.image1, (self.rect.x, self.rect.y))
+        else:
+            okienko.blit(self.image, (self.rect.x, self.rect.y))
 
 # KLASA GRACZ
 class Gracz(Byt):
@@ -350,6 +351,17 @@ class Pocisk(Byt):
         """Sprawdza, czy następuje kolizja między pociskiem a obiektem."""
         return kolizja(self, obiekt)
 
+# KLASA SCENA
+class Scena():
+    obecnaScena = None
+
+    def __init__(self, tag, przyciski = []):
+        self.tag = tag
+        self.przyciski = przyciski
+
+    def rysujPrzyciski(self):
+        for przycisk in self.przyciski:
+            przycisk.rysujPrzycisk()
 ##
 ##      OBIEKTY
 ##
@@ -399,206 +411,211 @@ def kolizja(obiekt1, obiekt2):
 
 WZNÓW = Przycisk(0, 200, wznów, wznów1)
 WYJDŹ = Przycisk(200, 200, wyjdź, wyjdź1)
-
-menu = True
 START = Przycisk(0, 0, start, start1)
 EXIT = Przycisk(450, 0, exit, exit1)
 INSTRUKCJA = Przycisk(0, 500, instrukcja, instrukcja1)
+
+MENU_PONOWNIE = Przycisk(0, 0, włączony, włączony1)
+WYJDŹ_PONOWNIE = Przycisk(0, 400, wyjdź, wyjdź1)
+GRAJ_PONOWNIE = Przycisk(400, 0, start, start1)
 
 dźwięk = True
 czy_instrukcja = False
 śmierć = False
 
-while menu:
-    while czy_instrukcja:
+SCENA_MENU = Scena("MENU", [START, INSTRUKCJA, EXIT])
+SCENA_GRA = Scena("GRA")
+SCENA_INSTRUKCJE = Scena("INSTRUKCJE", [INSTRUKCJA])
+SCENA_PAUZA = Scena("PAUZA", [WZNÓW, WYJDŹ])
+SCENA_ŚMIERĆ = Scena("ŚMIERĆ")
+
+Scena.obecnaScena = SCENA_MENU
+
+scena : Scena
+graj = True
+while graj:
+    scena = Scena.obecnaScena
+    dt = zegarek.tick(FPS)
+    keys = pygame.key.get_pressed()
+    pygame.display.update()
+
+    zdarzenia = pygame.event.get()  #to chyba najwazniejsza linijka programu
+
+    for zdarzenie in zdarzenia:
+        if zdarzenie.type == pygame.QUIT:
+            graj = False
+    
+    if scena == SCENA_MENU:
+        okienko.fill('black')
+        if dźwięk:
+            DŹWIĘK = Przycisk(450, 500, włączony, włączony1)
+        else:
+            DŹWIĘK = Przycisk(450, 500, wyłączony, wyłączony1)
+
+        scena.rysujPrzyciski()
+        DŹWIĘK.rysujPrzycisk()
+        
+        if keys[pygame.K_LSHIFT]:
+            Scena.obecnaScena = SCENA_GRA
+        if keys[pygame.K_ESCAPE]:
+            graj = False
+
+        for zdarzenie in zdarzenia:
+            if zdarzenie.type == pygame.MOUSEBUTTONUP:
+                if START.czyMyszka():
+                    if dźwięk: 
+                        pygame.mixer.music.play(-1, 0)
+                    Scena.obecnaScena = SCENA_GRA
+                if EXIT.czyMyszka():
+                    graj = False
+                if DŹWIĘK.czyMyszka():
+                    dźwięk = not dźwięk
+                if INSTRUKCJA.czyMyszka():
+                    Scena.obecnaScena = SCENA_INSTRUKCJE
+    elif scena == SCENA_INSTRUKCJE:
         okienko.blit(jak_grać, (0, 0))
-        INSTRUKCJA.CzyMyszka_i_RysujPrzycisk()
-        pygame.display.update()
-        for zdarzenie in pygame.event.get():
+        scena.rysujPrzyciski()
+        for zdarzenie in zdarzenia:
+            if zdarzenie.type == pygame.KEYDOWN:
+                zdarzenie.key == pygame.K_ESCAPE
+                Scena.obecnaScena = SCENA_MENU
+            if zdarzenie.type == pygame.MOUSEBUTTONUP and INSTRUKCJA.czyMyszka():
+                Scena.obecnaScena = SCENA_MENU
+    elif scena == SCENA_GRA:
+        for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.QUIT:
                 graj = False
-                menu = False
-                czy_instrukcja = False
-            elif (zdarzenie.type == pygame.KEYDOWN and zdarzenie.key == pygame.K_ESCAPE) or (zdarzenie.type == pygame.MOUSEBUTTONUP and INSTRUKCJA.CzyMyszka_i_RysujPrzycisk()):
-                czy_instrukcja = False
-    okienko.fill('black')
-    if dźwięk:
-        DŹWIĘK = Przycisk(450, 500, włączony, włączony1)
-    else:
-        DŹWIĘK = Przycisk(450, 500, wyłączony, wyłączony1)
-    
-    DŹWIĘK.CzyMyszka_i_RysujPrzycisk()
-    START.CzyMyszka_i_RysujPrzycisk()
-    EXIT.CzyMyszka_i_RysujPrzycisk()
-    INSTRUKCJA.CzyMyszka_i_RysujPrzycisk()
-    
-    pygame.display.update()
-    for zdarzenie in pygame.event.get():
-        if zdarzenie.type == pygame.QUIT:
-            graj = False
-            menu = False
-        elif zdarzenie.type == pygame.KEYDOWN:
-            if zdarzenie.key == pygame.K_LSHIFT: # chciałem enter ale nie działa
-                graj = True
-                if dźwięk: pygame.mixer.music.play(-1, 0)
-                menu = False
-            elif zdarzenie.key == pygame.K_ESCAPE:
-                graj = False
-                menu = False
-        elif zdarzenie.type == pygame.MOUSEBUTTONUP:
-            if START.CzyMyszka_i_RysujPrzycisk():
-                graj = True
-                if dźwięk: pygame.mixer.music.play(-1, 0)
-                menu = False
-            elif EXIT.CzyMyszka_i_RysujPrzycisk():
-                menu = False
-                graj = False
-            elif DŹWIĘK.CzyMyszka_i_RysujPrzycisk():
-                dźwięk = not dźwięk
-            elif INSTRUKCJA.CzyMyszka_i_RysujPrzycisk():
-                czy_instrukcja = True
-
-while graj:
-    for zdarzenie in pygame.event.get():
-        if zdarzenie.type == pygame.QUIT:
-            graj = False
-        if zdarzenie.type == pojaw_przeciwnika and pauza is False: #pauza is False po to, aby przeciwnicy nie generowali się w trakcie pauzy
-            przeciwnik = Przeciwnik()
-            gdzie_przeciwnik = random.choice(podział_okienka)
-            przeciwnik.ustawPrzeciwnika(gdzie_przeciwnik, - przeciwnik.wys - 2)
-            enemyList.append(przeciwnik)
-        if zdarzenie.type == pygame.KEYDOWN:
-            if zdarzenie.key == pygame.K_ESCAPE:
-                pauza = not pauza
-                pygame.mixer.music.set_volume(.03)
-            elif zdarzenie.key == pygame.K_c:
-                print(pygame.time.get_ticks())
+            if zdarzenie.type == pojaw_przeciwnika and pauza is False: #pauza is False po to, aby przeciwnicy nie generowali się w trakcie pauzy
+                przeciwnik = Przeciwnik()
+                gdzie_przeciwnik = random.choice(podział_okienka)
+                przeciwnik.ustawPrzeciwnika(gdzie_przeciwnik, - przeciwnik.wys - 2)
+                enemyList.append(przeciwnik)
+            if zdarzenie.type == pygame.KEYDOWN:
+                if zdarzenie.key == pygame.K_ESCAPE:
+                    Scena.obecnaScena = SCENA_PAUZA
+                    pygame.mixer.music.set_volume(.03)
+                elif zdarzenie.key == pygame.K_c:
+                    print(pygame.time.get_ticks())
 
 
-        # if zdarzenie.type == strzał_wróg1:
-        #     if enemyList != []:
-        #         random.choice(enemyList).wystrzelPocisk1()
-            
-    dt = zegarek.tick(FPS)
-    
-    keys = pygame.key.get_pressed()
-    
-    if pauza:
+            # if zdarzenie.type == strzał_wróg1:
+            #     if enemyList != []:
+            #         random.choice(enemyList).wystrzelPocisk1()
+                   
+        # WYKONUJE SIĘ NA KAŻDY TICK
+        okienko.blit(TŁO, (0,0))
+        czas_od_pocisku += dt
+        czas_płynny_ruch_przeciwnika += dt/17
+        #print(czas_płynny_ruch_przeciwnika)
+
+        if gracz.wystrzelPocisk(keys):
+            czas_od_pocisku = 0
+        
+        if czas_od_pocisku > 2000:
+            czas_od_pocisku = Gracz.cooldown
+        
+        enemyDoUsunięcia = []
+        strzelający_przeciwnik = random.randint(0, 300)
+        for enemy in enemyList:
+            if enemy.id == strzelający_przeciwnik:
+                enemy.wystrzelPocisk1()
+            if kolizja(enemy, gracz):
+                enemyDoUsunięcia.append(enemy)
+                punkty.dodawanie_punktów(-100)
+                zdrowie.zmiana_hp(-20)
+            enemy.ruchPrzeciwnika()
+            enemy.rysujPrzeciwnika()
+
+        pociskiDoUsunięcia = []
+        for pocisk in pociskList:
+            pocisk.ruchPocisku()
+            pocisk.rysujPocisk()
+            if pocisk.ktoStrzelił == "gracz":
+                for enemy in enemyList:
+                    if pocisk.czy_kolizja(enemy):
+                        pociskiDoUsunięcia.append(pocisk)
+                        enemy.hp += -1
+                        if enemy.hp == 0:
+                            punkty.dodawanie_punktów(200)
+                            enemyDoUsunięcia.append(enemy)
+            if pocisk.ktoStrzelił in ("wróg1", "wróg2"):
+                if pocisk.czy_kolizja(gracz):
+                    pociskiDoUsunięcia.append(pocisk)
+                    punkty.dodawanie_punktów(-100)
+                    strata = -20 if pocisk.ktoStrzelił == "wróg1" else -40
+                    zdrowie.zmiana_hp(strata)
+                    #^^^^^^^^^^^^^^^^^^
+                    #tutaj zrobimy stratę hp zależną od typu przeciwnika (to jak zrobimy klasę typów przeciwnika albo wczytywanie pliku)
+
+        for enemy in enemyDoUsunięcia:
+            try:
+                enemyList.remove(enemy)
+            except:
+                print("Błąd usunięcia przeciwnika.")
+        for pocisk in pociskiDoUsunięcia:
+            try:
+                pociskList.remove(pocisk)
+            except:
+                print("Błąd usunięcia pocisku.")
+
+        gracz.przesuńGracza(keys)
+        gracz.rysujGracza(okienko)
+        punkty.rysuj_scoreboard(okienko)
+        zdrowie.rysuj_pasek(okienko)
+        
+        if zdrowie.hp <= 0 :
+            pygame.mixer.music.stop()
+            #okienko.blit(GAME_OVER,(0,0))
+            #pygame.display.update()
+            #game_over = pygame.mixer.Sound('./music/game_over.mp3')
+            #muza = pygame.mixer.music.load(os.path.join("music","game_over.mp3"))
+            #if dźwięk:
+            #    pygame.mixer.music.play(-1, 0)
+        # pygame.time.wait(int(game_over.get_length()) * 1000)
+            Scena.obecnaScena = SCENA_ŚMIERĆ
+            pygame.mixer.music.load(game_over)
+            pygame.mixer.music.play()
+    elif scena == SCENA_PAUZA:
         okienko.blit(PAUZA, (0, 0))
-        WZNÓW.CzyMyszka_i_RysujPrzycisk()
-        WYJDŹ.CzyMyszka_i_RysujPrzycisk()
+        scena.rysujPrzyciski()
         pygame.display.update() # to ważne, nie usuwać
-        for zdarzenie in pygame.event.get():
+        for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.QUIT:
                 graj = False
             if zdarzenie.type == pygame.KEYDOWN:
                 if zdarzenie.key == pygame.K_LSHIFT: # chciałem enter ale nie działa
                     pygame.mixer.music.set_volume(.25)
-                    pauza = False
+                    Scena.obecnaScena = SCENA_GRA
                 elif zdarzenie.key == pygame.K_ESCAPE:
                     graj = False
-                    pauza = False
             elif zdarzenie.type == pygame.MOUSEBUTTONDOWN:
-                if WZNÓW.CzyMyszka_i_RysujPrzycisk():
+                if WZNÓW.czyMyszka():
                     pygame.mixer.music.set_volume(.25)
-                    pauza = False
-                elif WYJDŹ.CzyMyszka_i_RysujPrzycisk():
+                    Scena.obecnaScena = SCENA_GRA
+                elif WYJDŹ.czyMyszka():
                     graj = False
                     pauza = False
-        continue # continue powoduje, że pętla graj zaczyna się na nowo, więc dopóki nie skończymy pauzy, to nic nie będzie się poruszało
-    
-    # WYKONUJE SIĘ NA KAŻDY TICK
-    okienko.blit(TŁO, (0,0))
-    czas_od_pocisku += dt
-    czas_płynny_ruch_przeciwnika += dt/17
-    #print(czas_płynny_ruch_przeciwnika)
+    elif scena == SCENA_ŚMIERĆ:
+        okienko.blit(GAME_OVER, (0,0))
+        MENU_PONOWNIE.rysujPrzycisk()
+        WYJDŹ_PONOWNIE.rysujPrzycisk()
+        GRAJ_PONOWNIE.rysujPrzycisk()
+        for zdarzenie in zdarzenia:
+            if zdarzenie.type == pygame.QUIT:
+                game_over = False
+                żywy = False
+                pygame.mixer.stop()
+            if zdarzenie.type == pygame.MOUSEBUTTONUP:
+                if WYJDŹ_PONOWNIE.czyMyszka():
+                    pygame.mixer.stop()
+                    graj = False
+                elif MENU_PONOWNIE.czyMyszka():
+                    Scena.obecnaScena = SCENA_MENU
+                    pygame.mixer.stop()
+                elif GRAJ_PONOWNIE.czyMyszka():
+                    Scena.obecnaScena = SCENA_GRA
+                    pygame.mixer.stop()
 
-    if gracz.wystrzelPocisk(keys):
-        czas_od_pocisku = 0
-    
-    if czas_od_pocisku > 2000:
-        czas_od_pocisku = Gracz.cooldown
-    
-    enemyDoUsunięcia = []
-    strzelający_przeciwnik = random.randint(0, 300)
-    for enemy in enemyList:
-        if enemy.id == strzelający_przeciwnik:
-            enemy.wystrzelPocisk1()
-        if kolizja(enemy, gracz):
-            enemyDoUsunięcia.append(enemy)
-            punkty.dodawanie_punktów(-100)
-            zdrowie.zmiana_hp(-20)
-        enemy.ruchPrzeciwnika()
-        enemy.rysujPrzeciwnika()
-
-    pociskiDoUsunięcia = []
-    for pocisk in pociskList:
-        pocisk.ruchPocisku()
-        pocisk.rysujPocisk()
-        if pocisk.ktoStrzelił == "gracz":
-            for enemy in enemyList:
-                if pocisk.czy_kolizja(enemy):
-                    pociskiDoUsunięcia.append(pocisk)
-                    enemy.hp += -1
-                    if enemy.hp == 0:
-                        punkty.dodawanie_punktów(200)
-                        enemyDoUsunięcia.append(enemy)
-        if pocisk.ktoStrzelił in ("wróg1", "wróg2"):
-            if pocisk.czy_kolizja(gracz):
-                pociskiDoUsunięcia.append(pocisk)
-                punkty.dodawanie_punktów(-100)
-                strata = -20 if pocisk.ktoStrzelił == "wróg1" else -40
-                zdrowie.zmiana_hp(strata)
-                #^^^^^^^^^^^^^^^^^^
-                #tutaj zrobimy stratę hp zależną od typu przeciwnika (to jak zrobimy klasę typów przeciwnika albo wczytywanie pliku)
-
-    for enemy in enemyDoUsunięcia:
-        try:
-            enemyList.remove(enemy)
-        except:
-            print("Błąd usunięcia przeciwnika.")
-    for pocisk in pociskiDoUsunięcia:
-        try:
-            pociskList.remove(pocisk)
-        except:
-            print("Błąd usunięcia pocisku.")
-
-    gracz.przesuńGracza(keys)
-    gracz.rysujGracza(okienko)
-    punkty.rysuj_scoreboard(okienko)
-    zdrowie.rysuj_pasek(okienko)
-
-    pygame.display.update()
-    
-    if zdrowie.hp <= 0 :
-        pygame.mixer.stop()
-        #okienko.blit(GAME_OVER,(0,0))
-        #pygame.display.update()
-        #game_over = pygame.mixer.Sound('./music/game_over.mp3')
-        #muza = pygame.mixer.music.load(os.path.join("music","game_over.mp3"))
-        #if dźwięk:
-        #    pygame.mixer.music.play(-1, 0)
-       # pygame.time.wait(int(game_over.get_length()) * 1000)
-        graj = False
-        śmierć = True
-
-game_over = pygame.mixer.Sound('./music/game_over.mp3')
-muza = pygame.mixer.music.load(os.path.join("music","game_over.mp3"))
-if dźwięk:
-    pygame.mixer.music.play(-1, 0)
-
-czas_śmierci = pygame.time.get_ticks()
-n = 0
-
-while n <= game_over.get_length() * FPS and śmierć:
-    okienko.blit(GAME_OVER, (0, 0))
-    if n%10 == 0: #rodzaj testu czy aby na pewno nie wywala okienka
-        okienko.blit(font.render("AAA",True,(255,255,255)),(0,0))
-    else:
-        okienko.blit(font.render("BBBBB",True,(255,0,255)),(0,0))
-    pygame.display.update()
-    n += 1
-#DO ZMIANY
-print(pygame.time.get_ticks() - czas_śmierci)
+print(pygame.time.get_ticks())
 
 pygame.quit()
