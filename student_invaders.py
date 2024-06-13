@@ -239,7 +239,6 @@ class Scoreboard():
         if zdrowie.hp <= 0 and self.rekord < self.wynik:
             with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
                 rekord.write(str(self.wynik))
-
 # KLASA ŻYCIE GRACZA
 class PasekZdrowia():
     def __init__(self, max_hp):
@@ -490,7 +489,7 @@ while graj:
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.MOUSEBUTTONUP:
                 if START.czyMyszka():
-                    if dźwięk: 
+                    if dźwięk:
                         pygame.mixer.music.play(-1, 0)
                     Scena.obecna_scena = SCENA_GRA
                 if EXIT.czyMyszka():
@@ -503,7 +502,6 @@ while graj:
                         DŹWIĘK = DŹWIĘK_OFF
                 if INSTRUKCJA.czyMyszka():
                     Scena.obecna_scena = SCENA_INSTRUKCJE
-
     elif scena == SCENA_INSTRUKCJE:
         okienko.blit(bg_instrukcje, (0, 0))
         scena.rysujPrzyciski()
@@ -605,9 +603,21 @@ while graj:
             wybuch.IleOdWybuchu(czas)
         
         if zdrowie.hp <= 0:
+            
             Scena.obecna_scena = SCENA_ŚMIERĆ
             pygame.mixer.music.load(mus_gameover)
             pygame.mixer.music.play()
+
+            punkty.wynik = 0
+            zdrowie.hp = zdrowie.max_hp
+            #gracz = Gracz()
+            gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
+            Przeciwnik.stworzonych_przeciwnikow = 0
+
+            enemyList = []
+            pociskList = []
+            wybuchList = []          #Czyścimy listy, aby przeciwnicy, wybuchy oraz pociski z poprzedniej rundy nie pojawiali się w nowej
+    
     elif scena == SCENA_PAUZA:
         okienko.blit(bg_pauza, (0, 0))
         scena.rysujPrzyciski()
@@ -649,12 +659,5 @@ while graj:
                     pygame.mixer.music.stop()
                     pygame.mixer.music.load(mus_gra)
                     pygame.mixer.music.play()
-
-                    enemyList = []
-                    pociskList = []
-                    gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
-                    zdrowie.hp = zdrowie.max_hp
-                    punkty = 0
-
 
 pygame.quit()
