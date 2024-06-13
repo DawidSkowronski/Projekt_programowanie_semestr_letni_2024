@@ -56,7 +56,7 @@ pygame.mixer.init()
 # SFX
 sfx_pocisk = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 sfx_pocisk_wroga = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
-sfx_eksplozja = pygame.mixer.Sound(os.path.join("sounds", "eksplozja.mp3"))
+sfx_eksplozja = pygame.mixer.Sound(os.path.join("sounds", "eksplozja.ogg"))
 sfx_pocisk.set_volume(.1)
 
 # MUZYKA
