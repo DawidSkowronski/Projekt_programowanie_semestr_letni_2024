@@ -22,7 +22,7 @@ kosmita = pygame.image.load(os.path.join("images","kosmita.png"))
 kosmita_1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png"))
 kosmita_2 = pygame.image.load(os.path.join("images","kosmita_dmg2.png"))
 
-krazownik = pygame.image.load(os.path.join("images","przeciwnik2.png")) 
+krazownik = pygame.image.load(os.path.join("images","przeciwnik2.png"))
 krazownik_1 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png"))
 krazownik_2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png"))
 
@@ -56,6 +56,7 @@ pygame.mixer.init()
 # SFX
 sfx_pocisk = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 sfx_pocisk_wroga = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
+sfx_eksplozja = pygame.mixer.Sound(os.path.join("sounds", "eksplozja.mp3"))
 sfx_pocisk.set_volume(.1)
 
 # MUZYKA
@@ -78,6 +79,32 @@ class Byt:
         self.y = y
         self.mask = mask
         self.obrazek = obrazek
+
+# KLASA WYBUCH
+class Wybuch():
+    """Klasa wybuch lol lmao rofl"""
+    def __init__(self):
+        self.img0 = but_dzwiek_enabled
+        self.img1 = but_dzwiek_enabled_hover
+        self.img2 = but_dzwiek_disabled
+    
+    def CzyWybuch(self, x, y, ticks_wybuchu):
+        self.czas = ticks_wybuchu
+        self.x = x
+        self.y = y
+    
+    def IleOdWybuchu(self, czas_od_wybuchu):
+        if czas_od_wybuchu - self.czas <= 450:
+            if czas_od_wybuchu - self.czas <= 300:
+                if czas_od_wybuchu - self.czas <= 150:
+                    okienko.blit(self.img0, (self.x, self.y))
+                    return
+                okienko.blit(self.img1, (self.x, self.y))
+                return
+            okienko.blit(self.img2, (self.x, self.y))
+            return
+        
+        else: wybuchList.remove(self)
 
 # KLASA PRZYCISK
 class Przycisk(Byt):
@@ -176,7 +203,7 @@ class Gracz(Byt):
             if keys[pygame.K_SPACE]:
                 pociskList.append(Pocisk(self.x + self.szer//2 - 10, self.y + self.wys//2, 25, "gracz"))
                 pociskList.append(Pocisk(self.x + self.szer//2 + 10, self.y + self.wys//2, 25, "gracz"))
-                if dźwięk: 
+                if dźwięk:
                     sfx_pocisk.play()
                 return True
         return False
@@ -396,6 +423,7 @@ zegarek = pygame.time.Clock()
 # LISTY
 enemyList = list[Przeciwnik]()          # lista przeciwników
 pociskList = list[Pocisk]()             # lista pocisków
+wybuchList = list[Wybuch]()             # lista wybuchów
 
 czas_od_pocisku = 0
 czas_płynny_ruch_przeciwnika = 0
@@ -505,7 +533,7 @@ while graj:
             # if zdarzenie.type == strzał_wróg1:
             #     if enemyList != []:
             #         random.choice(enemyList).wystrzelPocisk1()
-                   
+
         # WYKONUJE SIĘ NA KAŻDY TICK
         okienko.blit(bg_kosmos, (0,0))
         czas_od_pocisku += dt
@@ -529,7 +557,7 @@ while graj:
                 zdrowie.zmianaHp(-20)
             enemy.ruchPrzeciwnika()
             enemy.rysujPrzeciwnika()
-
+        
         pociski_do_usunięcia = []
         for pocisk in pociskList:
             pocisk.ruchPocisku()
@@ -550,8 +578,15 @@ while graj:
                     zdrowie.zmianaHp(strata)
                     #^^^^^^^^^^^^^^^^^^
                     #tutaj zrobimy stratę hp zależną od typu przeciwnika (to jak zrobimy klasę typów przeciwnika albo wczytywanie pliku)
-
+        
+        czas = pygame.time.get_ticks()
+        
         for enemy in enemy_do_usunięcia:
+            wybuch = Wybuch()
+            wybuch.CzyWybuch(enemy.x, enemy.y, czas)
+            wybuchList.append(wybuch)
+            if dźwięk:
+                sfx_eksplozja.play()
             try:
                 enemyList.remove(enemy)
             except:
@@ -561,11 +596,13 @@ while graj:
                 pociskList.remove(pocisk)
             except:
                 print("Błąd usunięcia pocisku.")
-
         gracz.przesuńGracza()
         gracz.rysujGracza()
         punkty.rysujScoreboard()
         zdrowie.rysujPasek()
+
+        for wybuch in wybuchList:
+            wybuch.IleOdWybuchu(czas)
         
         if zdrowie.hp <= 0:
             Scena.obecna_scena = SCENA_ŚMIERĆ
@@ -619,6 +656,5 @@ while graj:
                     zdrowie.hp = zdrowie.max_hp
                     punkty = 0
 
-print(pygame.time.get_ticks())
 
 pygame.quit()
