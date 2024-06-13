@@ -15,7 +15,6 @@ font = pygame.font.Font(None,32)
 fps = 60
 okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
 
-
 # SPRAJTY
 statek = pygame.image.load(os.path.join("images","statek.png")).convert_alpha()
 icon = pygame.image.load(os.path.join("images","ic_statek.png")).convert_alpha()
@@ -31,6 +30,10 @@ krazownik_2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg2.png")).c
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png")).convert_alpha()
 pocisk_kosmity = pygame.image.load(os.path.join("images","pocisk_wróg1.png")).convert_alpha()
 pocisk_krazownika = pygame.image.load(os.path.join("images","pocisk2.png")).convert_alpha()
+
+eksplozja = pygame.image.load(os.path.join("images","eksplozja1.png")).convert_alpha()
+eksplozja_1 = pygame.image.load(os.path.join("images","eksplozja2.png")).convert_alpha()
+eksplozja_2 = pygame.image.load(os.path.join("images","eksplozja3.png")).convert_alpha()
 
 but_start = pygame.image.load(os.path.join("images","START.png")).convert_alpha()
 but_start_hover = pygame.image.load(os.path.join("images","START1.png")).convert_alpha()
@@ -60,6 +63,7 @@ sfx_pocisk = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 sfx_pocisk_wroga = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
 sfx_eksplozja = pygame.mixer.Sound(os.path.join("sounds", "eksplozja.ogg"))
 sfx_pocisk.set_volume(.1)
+sfx_eksplozja.set_volume(.35)
 
 # MUZYKA
 mus_gameover = os.path.join("music","game_over.mp3")
@@ -85,25 +89,30 @@ class Byt:
 # KLASA WYBUCH
 class Wybuch():
     """Klasa wybuch lol lmao rofl"""
-    def __init__(self):
-        self.img0 = but_dzwiek_enabled
-        self.img1 = but_dzwiek_enabled_hover
-        self.img2 = but_dzwiek_disabled
-    
-    def CzyWybuch(self, x, y, ticks_wybuchu):
-        self.czas = ticks_wybuchu
+    def __init__(self, x, y):
+        self.img0 = eksplozja
+        self.img1 = eksplozja_1
+        self.img2 = eksplozja_2
         self.x = x
         self.y = y
+        self.miejsce_wybuchu = (self.x + kosmita.get_width()//2 - eksplozja.get_width()//2, self.y + kosmita.get_height()//2 - eksplozja.get_height()//2)
+    
+    def CzyWybuch(self, x, y, ticks_wybuchu):
+        self.x = x
+        self.y = y
+        self.czas = ticks_wybuchu
     
     def IleOdWybuchu(self, czas_od_wybuchu):
-        if czas_od_wybuchu - self.czas <= 450:
-            if czas_od_wybuchu - self.czas <= 300:
-                if czas_od_wybuchu - self.czas <= 150:
-                    okienko.blit(self.img0, (self.x, self.y))
+        
+
+        if czas_od_wybuchu - self.czas <= 225:
+            if czas_od_wybuchu - self.czas <= 150:
+                if czas_od_wybuchu - self.czas <= 75:
+                    okienko.blit(self.img0, self.miejsce_wybuchu)
                     return
-                okienko.blit(self.img1, (self.x, self.y))
+                okienko.blit(self.img1, self.miejsce_wybuchu)
                 return
-            okienko.blit(self.img2, (self.x, self.y))
+            okienko.blit(self.img2, self.miejsce_wybuchu)
             return
         
         else: wybuchList.remove(self)
@@ -241,6 +250,7 @@ class Scoreboard():
         if zdrowie.hp <= 0 and self.rekord < self.wynik:
             with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
                 rekord.write(str(self.wynik))
+
 # KLASA ŻYCIE GRACZA
 class PasekZdrowia():
     def __init__(self, max_hp):
@@ -283,7 +293,7 @@ class Przeciwnik(Byt):
             self.obraz_2 = krazownik_2
             self.speed = 0.5
             self.pocisk_speed = 5
-            self.hp = 10
+            self.hp = 7
         else:
             self.tag = "kosmita"
             self.obraz = kosmita
@@ -582,7 +592,7 @@ while graj:
         czas = pygame.time.get_ticks()
         
         for enemy in enemy_do_usunięcia:
-            wybuch = Wybuch()
+            wybuch = Wybuch(enemy.x, enemy.y)
             wybuch.CzyWybuch(enemy.x, enemy.y, czas)
             wybuchList.append(wybuch)
             if dźwięk:
@@ -619,7 +629,6 @@ while graj:
             enemyList = []
             pociskList = []
             wybuchList = []          #Czyścimy listy, aby przeciwnicy, wybuchy oraz pociski z poprzedniej rundy nie pojawiali się w nowej
-    
     elif scena == SCENA_PAUZA:
         okienko.blit(bg_pauza, (0, 0))
         scena.rysujPrzyciski()
@@ -655,6 +664,7 @@ while graj:
                 elif MENU_PONOWNIE.czyMyszka():
                     Scena.obecna_scena = SCENA_MENU
                     pygame.mixer.stop()
+                    pygame.mixer.music.load(mus_gra)
                 elif GRAJ_PONOWNIE.czyMyszka():
                     Scena.obecna_scena = SCENA_GRA
                     
