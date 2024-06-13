@@ -17,50 +17,40 @@ okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
 
 
 # SPRAJTY
-statek = pygame.image.load(os.path.join("images","statek.png")).convert()
-statek.set_colorkey((255,255,255))
-icon = pygame.image.load(os.path.join("images","ic_statek.png")).convert()
-icon.set_colorkey((0,0,0))
+statek = pygame.image.load(os.path.join("images","statek.png")).convert_alpha()
+icon = pygame.image.load(os.path.join("images","ic_statek.png")).convert_alpha()
 
-kosmita = pygame.image.load(os.path.join("images","kosmita.png")).convert()
-kosmita.set_colorkey((0,0,0))
-kosmita_1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png")).convert()
-kosmita_1.set_colorkey((0,0,0))
-kosmita_2 = pygame.image.load(os.path.join("images","kosmita_dmg2.png")).convert()
-kosmita_2.set_colorkey((0,0,0))
+kosmita = pygame.image.load(os.path.join("images","kosmita.png")).convert_alpha()
+kosmita_1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png")).convert_alpha()
+kosmita_2 = pygame.image.load(os.path.join("images","kosmita_dmg2.png")).convert_alpha()
 
-krazownik = pygame.image.load(os.path.join("images","przeciwnik2.png")).convert()
-krazownik.set_colorkey((0,0,0))
-krazownik_1 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png")).convert()
-krazownik_1.set_colorkey((255,255,255))
-krazownik_2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg2.png")).convert()
-krazownik_2.set_colorkey((0,0,0))
+krazownik = pygame.image.load(os.path.join("images","przeciwnik2.png")).convert_alpha()
+krazownik_1 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png")).convert_alpha()
+krazownik_2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg2.png")).convert_alpha()
 
-pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png")).convert()
-pocisk_kosmity = pygame.image.load(os.path.join("images","pocisk_wróg1.png")).convert()
-pocisk_kosmity.set_colorkey((0,0,0))
-pocisk_krazownika = pygame.image.load(os.path.join("images","pocisk2.png")).convert()
-pocisk_krazownika.set_colorkey((0,0,0))
+pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png")).convert_alpha()
+pocisk_kosmity = pygame.image.load(os.path.join("images","pocisk_wróg1.png")).convert_alpha()
+pocisk_krazownika = pygame.image.load(os.path.join("images","pocisk2.png")).convert_alpha()
 
-but_start = pygame.image.load(os.path.join("images","START.png")).convert()
-but_start_hover = pygame.image.load(os.path.join("images","START1.png")).convert()
-but_wyjscie = pygame.image.load(os.path.join("images","EXIT.png")).convert()
-but_wyjscie_hover = pygame.image.load(os.path.join("images","EXIT1.png")).convert()
-but_kontynuuj = pygame.image.load(os.path.join("images","kontynuuj.jpg")).convert()
-but_kontynuuj_hover = pygame.image.load(os.path.join("images","kontynuuj1.jpg")).convert()
+but_start = pygame.image.load(os.path.join("images","START.png")).convert_alpha()
+but_start_hover = pygame.image.load(os.path.join("images","START1.png")).convert_alpha()
+but_wyjscie = pygame.image.load(os.path.join("images","EXIT.png")).convert_alpha()
+but_wyjscie_hover = pygame.image.load(os.path.join("images","EXIT1.png")).convert_alpha()
+but_kontynuuj = pygame.image.load(os.path.join("images","kontynuuj.jpg")).convert_alpha()
+but_kontynuuj_hover = pygame.image.load(os.path.join("images","kontynuuj1.jpg")).convert_alpha()
 
-but_dzwiek_enabled = pygame.image.load(os.path.join("images","włączony.jpg")).convert()
-but_dzwiek_enabled_hover = pygame.image.load(os.path.join("images","włączony1.jpg")).convert()
-but_dzwiek_disabled = pygame.image.load(os.path.join("images","wyłączony.jpg")).convert()
-but_dzwiek_disabled_hover = pygame.image.load(os.path.join("images","wyłączony1.jpg")).convert()
+but_dzwiek_enabled = pygame.image.load(os.path.join("images","włączony.jpg")).convert_alpha()
+but_dzwiek_enabled_hover = pygame.image.load(os.path.join("images","włączony1.jpg")).convert_alpha()
+but_dzwiek_disabled = pygame.image.load(os.path.join("images","wyłączony.jpg")).convert_alpha()
+but_dzwiek_disabled_hover = pygame.image.load(os.path.join("images","wyłączony1.jpg")).convert_alpha()
 
-but_instrukcje = pygame.image.load(os.path.join("images","instrukcja.jpg")).convert()
-but_instrukcje_hover = pygame.image.load(os.path.join("images","instrukcja1.jpg")).convert()
+but_instrukcje = pygame.image.load(os.path.join("images","instrukcja.jpg")).convert_alpha()
+but_instrukcje_hover = pygame.image.load(os.path.join("images","instrukcja1.jpg")).convert_alpha()
 
-bg_instrukcje = pygame.image.load(os.path.join("images","jak.jpg")).convert()
-bg_kosmos = pygame.image.load(os.path.join("images","kosmos.png")).convert()
-bg_gameover = pygame.image.load(os.path.join("images","game_over.png")).convert()
-bg_pauza = pygame.image.load(os.path.join("images","pauza.png")).convert()
+bg_instrukcje = pygame.image.load(os.path.join("images","jak.jpg")).convert_alpha()
+bg_kosmos = pygame.image.load(os.path.join("images","kosmos.png")).convert_alpha()
+bg_gameover = pygame.image.load(os.path.join("images","game_over.png")).convert_alpha()
+bg_pauza = pygame.image.load(os.path.join("images","pauza.png")).convert_alpha()
 
 # DŹWIĘKI
 pygame.mixer.init()
@@ -293,7 +283,7 @@ class Przeciwnik(Byt):
             self.obraz_2 = krazownik_2
             self.speed = 0.5
             self.pocisk_speed = 5
-            self.hp = 7
+            self.hp = 10
         else:
             self.tag = "kosmita"
             self.obraz = kosmita
