@@ -213,7 +213,7 @@ class Gracz(Byt):
 
     def wystrzelPocisk(self):
         """Pozwala graczowi wystrzelić pocisk, zwraca prawdę jeśli go wystrzeli."""
-        if czas_od_pocisku > Gracz.cooldown_strzalu:
+        if czas_od_pocisku > Gracz.cooldown_strzalu + self.cooldown_przegrzania:
             if keys[pygame.K_SPACE]:
                 pociskList.append(Pocisk(self.x + self.szer//2 - 10, self.y + self.wys//2, 25, "gracz"))
                 pociskList.append(Pocisk(self.x + self.szer//2 + 10, self.y + self.wys//2, 25, "gracz"))
