@@ -221,10 +221,13 @@ class Gracz(Byt):
                     sfx_pocisk.play()
                 return True
         return False
-    def przegranie(self):
+    def przegrzanie(self):
         poziom_przegrzania = self.aktualne_przegrzanie / self.maks_przegrzanie
         if keys[pygame.K_SPACE]:
-            self.aktualne_przegrzanie += 0.8
+            if self.cooldown_przegrzania == 0:
+                self.aktualne_przegrzanie += 0.8
+            else:
+                self.aktualne_przegrzanie -= 0.5
             if self.aktualne_przegrzanie > self.maks_przegrzanie:
                 self.aktualne_przegrzanie = self.maks_przegrzanie
                 self.cooldown_przegrzania = 10000000
@@ -625,7 +628,7 @@ while graj:
                 print("Błąd usunięcia pocisku.")
         gracz.przesuńGracza()
         gracz.rysujGracza()
-        gracz.przegranie()
+        gracz.przegrzanie()
         punkty.rysujScoreboard()
         zdrowie.rysujPasek()
 
