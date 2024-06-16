@@ -153,6 +153,9 @@ class Gracz(Byt):
         self.dx = 0
         self.dy = 0
         self.predkosc = 10
+        self.maks_przegrzanie = 100
+        self.aktualne_przegrzanie = 0
+        self.cooldown_przegrzania = 0
 
     def ustawGracza(self, x, y):
         """Ustawia gracza na konkretne koordynaty."""
@@ -218,6 +221,20 @@ class Gracz(Byt):
                     sfx_pocisk.play()
                 return True
         return False
+    def przegranie(self):
+        poziom_przegrzania = self.aktualne_przegrzanie / self.maks_przegrzanie
+        if keys[pygame.K_SPACE]:
+            self.aktualne_przegrzanie += 0.8
+            if self.aktualne_przegrzanie > self.maks_przegrzanie:
+                self.aktualne_przegrzanie = self.maks_przegrzanie
+                self.cooldown_przegrzania = 10000000
+        else:
+            self.aktualne_przegrzanie -= 0.5
+            if self.aktualne_przegrzanie < 0:
+                self.aktualne_przegrzanie = 0
+                self.cooldown_przegrzania = 0
+        pygame.draw.rect(okienko, "gray", (self.x +125, self.y +7, 13, 120))
+        pygame.draw.rect(okienko, "orange", (self.x +125, self.y +7 , 13, 120 * poziom_przegrzania))
 
 # KLASA PUNKTY GRACZA
 class Scoreboard():
@@ -608,6 +625,7 @@ while graj:
                 print("Błąd usunięcia pocisku.")
         gracz.przesuńGracza()
         gracz.rysujGracza()
+        gracz.przegranie()
         punkty.rysujScoreboard()
         zdrowie.rysujPasek()
 
