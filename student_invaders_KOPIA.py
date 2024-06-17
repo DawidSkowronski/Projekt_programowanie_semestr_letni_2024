@@ -69,6 +69,8 @@ pygame.mixer.init()
 sfx_pocisk = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 sfx_pocisk_wroga = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
 sfx_eksplozja = pygame.mixer.Sound(os.path.join("sounds", "eksplozja.ogg"))
+sfx_rakieta = pygame.mixer.Sound(os.path.join("sounds", "rakieta.mp3"))
+sfx_eksplozja_rakiety = pygame.mixer.Sound(os.path.join("sounds", "eksplozja_rakieta.mp3"))
 sfx_pocisk.set_volume(.1)
 sfx_eksplozja.set_volume(.35)
 
@@ -243,6 +245,8 @@ class Gracz(Byt):
             if keys[pygame.K_LSHIFT] and Gracz.ilość_rakiet > 0:
                 pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, 15, "rakieta"))
                 Gracz.ilość_rakiet += -1
+                if dźwięk:
+                    sfx_rakieta.play()
                 return True
         return False
 
@@ -623,7 +627,9 @@ while graj:
                             wybuch = Wybuch(pocisk.x, pocisk.y)
                             wybuch.CzyWybuch(pocisk.x, pocisk.y, czas, True)
                             wybuchList.append(wybuch)
-                            (x0, y0) = (pocisk.x, pocisk.y)
+                            (x0, y0) = (pocisk.x + pocisk_gracza1.get_width()//2, pocisk.y + pocisk_gracza1.get_height()//2)
+                            if dźwięk:
+                                sfx_eksplozja_rakiety.play()
             if pocisk.kto_strzelił in ("kosmita", "krążownik"):
                 if pocisk.czyKolizja(gracz):
                     pociski_do_usunięcia.append(pocisk)
@@ -635,7 +641,7 @@ while graj:
         
         if czy_rakieta_wybucha:
             for enemy in enemyList:
-                if (enemy.x - x0)**2 + (enemy.y - y0)**2 <= (eksplozja.get_height()*2)**2:
+                if ((enemy.x + enemy.obraz.get_width()//2) - x0)**2 + ((enemy.y + enemy.obraz.get_height()//2) - y0)**2 <= (eksplozja.get_height())**2:
                     enemy.hp += -5
                 if enemy.hp <= 0:
                     punkty.dodawaniePunktów(200)
