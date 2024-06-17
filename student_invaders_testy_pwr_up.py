@@ -130,7 +130,7 @@ class Bonusy(Byt):
         self.x = x
         self.y = y
         self.obraz = klucz_bonus
-        self.speed = 1
+        self.speed = 2.5
 
         mask = pygame.mask.from_surface(self.obraz)
         Byt.__init__(self, x, y, mask, self.obraz)
@@ -141,9 +141,9 @@ class Bonusy(Byt):
         okienko.blit(self.obraz,(self.x,self.y))
 
     def ruchBonusu(self):
-        self.dx = self.speed/2
+        self.dx = self.speed
         self.x -= self.dx
-        self.dy = (math.sin(czas_ruch_bonusu/10))
+        self.dy = (self.speed*math.sin(czas_ruch_bonusu/10))
         self.y -= self.dy
     
     def ustawBonus(self, x , y):
@@ -619,7 +619,11 @@ while graj:
                 zdrowie.zmianaHp(-20)
             enemy.ruchPrzeciwnika()
             enemy.rysujPrzeciwnika()
-        
+
+        for bonus in bonusList:
+            bonus.ruchBonusu()
+            bonus.rysujBonus()
+
         pociski_do_usunięcia = []        
         bonusy_do_usunięcia = []
 
@@ -645,8 +649,7 @@ while graj:
             for bonus in bonusList:
                 if pocisk.czyKolizja(bonus):
                     bonusy_do_usunięcia.append(bonus)
-                bonus.ruchBonusu()
-                bonus.rysujBonus()
+        
 
         czas = pygame.time.get_ticks()
         
