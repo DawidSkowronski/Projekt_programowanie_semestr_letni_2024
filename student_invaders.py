@@ -981,8 +981,9 @@ while graj:
                     pauza = False
     elif scena == SCENA_ŚMIERĆ:
         okienko.blit(bg_gameover, (0,0))
-
         scena.rysujPrzyciski()
+
+        czas_intro = 0
 
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.QUIT:
@@ -998,7 +999,6 @@ while graj:
                     pygame.mixer.music.play()
                 elif GRAJ_PONOWNIE.czyMyszka():
                     Scena.obecna_scena = SCENA_GRA
-                    czas_intro = 0
                     pygame.mixer.music.stop()
                     pygame.mixer.music.load(mus_gra)
                     pygame.mixer.music.play()
