@@ -394,6 +394,8 @@ class Gracz(Byt):
                 if self.aktualne_przegrzanie > self.maks_przegrzanie:
                     self.aktualne_przegrzanie = self.maks_przegrzanie
                     self.cooldown_przegrzania = 0
+        if Gracz.przegrzanie_bonus is True:
+            sfx_alarm.stop()
         pygame.draw.rect(okienko, "orange", (self.x +125, self.y +7, 13, 120))
         pygame.draw.rect(okienko, "gray", (self.x +125, self.y +7 , 13, 120 * self.poziom_przegrzania))
 
@@ -404,7 +406,7 @@ class Scoreboard:
         try:
             os.mkdir('.\pliki')
         except:
-            print("Katalog już istnieje")
+            pass
         try:
             with open(os.path.join("pliki","rekord.txt"), 'r') as rekord:
                 self.rekord = int(rekord.read())
@@ -413,7 +415,7 @@ class Scoreboard:
                 rekord.write(str(0))
                 self.rekord = 0
         #print(self.rekord)
-    
+
     def dodawaniePunktów(self,wartość):
         """Dodaje punkty do wyniku."""
         self.wynik += wartość
@@ -425,11 +427,15 @@ class Scoreboard:
             okienko.blit(font.render("NOWY REKORD: " + str(self.wynik),True,(0, 200, 0)),(0,20))
         else:
             okienko.blit(font.render("Rekord: " + str(self.rekord),True,(255, 255, 255)),(0,20))
-        if zdrowie.hp <= 0 and self.rekord < self.wynik:
-            with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
-                rekord.write(str(self.wynik))
         okienko.blit(font.render("Ilość rakiet: " + str(Gracz.ilość_rakiet),True,(255,255,255)),(0,40))
-
+    
+    def resetRekordu(self):
+        """Zeruje najlepszy wynik gracza"""
+        print(self.rekord)
+        with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
+            rekord.write(str(0))
+            self.rekord = 0
+        
 # KLASA ŻYCIE GRACZA
 class PasekZdrowia:
     def __init__(self, max_hp):
@@ -718,6 +724,8 @@ while graj:
             Scena.obecna_scena = SCENA_GRA
         if keys[pygame.K_ESCAPE]:
             graj = False
+        if keys[pygame.K_r]:
+            punkty.resetRekordu()
 
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.MOUSEBUTTONUP:
@@ -915,6 +923,11 @@ while graj:
         
         if zdrowie.hp <= 0:
             
+            if punkty.rekord < punkty.wynik:
+                with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
+                    rekord.write(str(punkty.wynik))
+                    punkty.rekord = punkty.wynik
+            
             Scena.obecna_scena = SCENA_ŚMIERĆ
             pygame.mixer.music.load(mus_gameover)
             pygame.mixer.music.play()
@@ -928,6 +941,8 @@ while graj:
 
             Przeciwnik.stworzonych_przeciwnikow = 0
             
+            cykl_pojawienia_pwr_up = 15
+
             enemyList.clear()
             pociskList.clear()
             bonusList.clear()
