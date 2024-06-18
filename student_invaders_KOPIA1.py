@@ -214,21 +214,25 @@ class Bonusy(Byt):
         self.y = y
         self.speed = 2.5
         self.nietrafiony = True
+        self.z_prawej_do_lewej = random.choice([True, False])
+        print(self.z_prawej_do_lewej)
         if zdrowie.hp >= zdrowie.max_hp:
-            self.pwr_up = random.choice([i for i in range(1, 3) if i != Bonusy.poprzedni_pwr_up])
-            Bonusy.poprzedni_pwr_up = self.pwr_up
-        elif zdrowie.hp >= zdrowie.max_hp * 0.3:
             self.pwr_up = random.choice([i for i in range(1, 4) if i != Bonusy.poprzedni_pwr_up])
             Bonusy.poprzedni_pwr_up = self.pwr_up
-        else:
-            self.pwr_up = 3
+        elif zdrowie.hp >= zdrowie.max_hp * 0.3:
+            self.pwr_up = random.choice([i for i in range(1, 5) if i != Bonusy.poprzedni_pwr_up])
             Bonusy.poprzedni_pwr_up = self.pwr_up
-        print(Bonusy.poprzedni_pwr_up)
+        else:
+            self.pwr_up = 4
+            Bonusy.poprzedni_pwr_up = self.pwr_up
+        #print(Bonusy.poprzedni_pwr_up)
         if self.pwr_up == 1:
             self.obraz = pocisk_kosmity
         elif self.pwr_up == 2:
             self.obraz = pocisk_gracza1
         elif self.pwr_up == 3:
+            self.obraz = pocisk_krazownika
+        elif self.pwr_up == 4:
             self.obraz = bonus_klucz
         
         mask = pygame.mask.from_surface(self.obraz)
@@ -238,16 +242,31 @@ class Bonusy(Byt):
 
     def rysujBonus(self):
         okienko.blit(self.obraz,(self.x,self.y))
+        if self.z_prawej_do_lewej and self.x <= 0 - self.obraz.get_width() - 5:
+            print("BONUS USUNIĘTY")
+            bonusList.remove(self)
+            del self
+        elif self.x >= OKNO_SZER + self.obraz.get_width() + 5:
+            print("BONUS USUNIĘTY")
+            bonusList.remove(self)
+            del self
 
     def ruchBonusu(self):
         self.dx = self.speed
-        self.x -= self.dx
+        if self.z_prawej_do_lewej:
+            self.x -= self.dx
+        else:
+            self.x += self.dx
         self.dy = (self.speed*math.sin(czas_ruch_bonusu/10))
         self.y -= self.dy
     
     def ustawBonus(self, x , y):
-        self.x = OKNO_SZER
-        self.y = OKNO_WYS//2
+        if self.z_prawej_do_lewej:
+            self.x = OKNO_SZER
+        else:
+            self.x = 0 - self.obraz.get_width()
+        self.y = OKNO_WYS//3*2 + 50 - random.random() * (OKNO_WYS//3 - 50)
+        #Zakres "spawnu": (OKNO_WYS//3 ; OKNO_WYS//3*2 + 50], można zmienić, bo funkcja malejąca, a random.random() zwraca wartości w zakresie [0.0, 1.0)
 
 # KLASA GRACZ
 class Gracz(Byt):
@@ -255,7 +274,8 @@ class Gracz(Byt):
     cooldown_strzalu = 125
     cooldown_rakiety = 500
     ilość_rakiet = pakiet_rakiet
-    niezniszczalność = False
+    niezniszczalność_bonus = False
+    przegrzanie_bonus = False
     
     def __init__(self):
         mask = pygame.mask.from_surface(statek)
@@ -277,7 +297,7 @@ class Gracz(Byt):
 
     def rysujGracza(self):
         """Rysuje instancję gracza."""
-        if Gracz.niezniszczalność:
+        if Gracz.niezniszczalność_bonus:
             okienko.blit(self.obrazek1, (self.x,self.y))
             return
         okienko.blit(self.obrazek, (self.x,self.y))
@@ -351,29 +371,29 @@ class Gracz(Byt):
     
     def przegrzanie(self):
         self.poziom_przegrzania = self.aktualne_przegrzanie / self.maks_przegrzanie
-
-        if keys[pygame.K_SPACE]:
-            if self.cooldown_przegrzania == 0:
-                self.aktualne_przegrzanie -= .5
-            elif self.aktualne_przegrzanie > self.maks_przegrzanie:
+        if Gracz.przegrzanie_bonus is False:
+            if keys[pygame.K_SPACE]:
+                if self.cooldown_przegrzania == 0:
+                    self.aktualne_przegrzanie -= .5
+                elif self.aktualne_przegrzanie > self.maks_przegrzanie:
+                        self.aktualne_przegrzanie = self.maks_przegrzanie
+                        self.cooldown_przegrzania = 0
+                else:
+                    self.aktualne_przegrzanie += 1
+                if self.aktualne_przegrzanie < 0:
+                    self.aktualne_przegrzanie = 0
+                    self.cooldown_przegrzania = 1000000
+                    sfx_alarm.stop()
+                    #sfx_tsss.play()
+                if self.aktualne_przegrzanie == 30.5:
+                    sfx_alarm.play()
+            else:
+                if self.aktualne_przegrzanie > 30.5:
+                    sfx_alarm.stop()
+                self.aktualne_przegrzanie += 2
+                if self.aktualne_przegrzanie > self.maks_przegrzanie:
                     self.aktualne_przegrzanie = self.maks_przegrzanie
                     self.cooldown_przegrzania = 0
-            else:
-                self.aktualne_przegrzanie += 1
-            if self.aktualne_przegrzanie < 0:
-                self.aktualne_przegrzanie = 0
-                self.cooldown_przegrzania = 1000000
-                sfx_alarm.stop()
-                #sfx_tsss.play()
-            if self.aktualne_przegrzanie == 30.5:
-                sfx_alarm.play()
-        else:
-            if self.aktualne_przegrzanie > 30.5:
-                sfx_alarm.stop()
-            self.aktualne_przegrzanie += 2
-            if self.aktualne_przegrzanie > self.maks_przegrzanie:
-                self.aktualne_przegrzanie = self.maks_przegrzanie
-                self.cooldown_przegrzania = 0
         pygame.draw.rect(okienko, "orange", (self.x +125, self.y +7, 13, 120))
         pygame.draw.rect(okienko, "gray", (self.x +125, self.y +7 , 13, 120 * self.poziom_przegrzania))
 
@@ -392,7 +412,7 @@ class Scoreboard:
             with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
                 rekord.write(str(0))
                 self.rekord = 0
-        print(self.rekord)
+        #print(self.rekord)
     
     def dodawaniePunktów(self,wartość):
         """Dodaje punkty do wyniku."""
@@ -613,7 +633,8 @@ czas_płynny_ruch_przeciwnika = 0
 czas_ruch_bonusu = 0
 czas_intro = 0
 czas_goodman = 0
-czas_niezniszczalności = 0
+czas_niezniszczalności_bonus = 0
+czas_przegrzanie_bonus = 0
 
 # funkcja sprawdzająca kolizję obiektów
 def kolizja(obiekt1, obiekt2):
@@ -648,7 +669,7 @@ SCENA_PAUZA = Scena("PAUZA", [WZNÓW, WYJDŹ])
 SCENA_ŚMIERĆ = Scena("ŚMIERĆ", [MENU_PONOWNIE, WYJDŹ_PONOWNIE, GRAJ_PONOWNIE])
 SCENA_GOODMAN = Scena("SAUL GOODMAN")
 
-if random.randint(1, 10) == 5:
+if random.randint(1, 10) != 5:
     Scena.obecna_scena = SCENA_GOODMAN
     pygame.mixer.music.load(mus_goodman)
     pygame.mixer.music.play()
@@ -774,7 +795,7 @@ while graj:
                 enemy.wystrzelPocisk()
             if kolizja(enemy, gracz):
                 enemy_do_usunięcia.append(enemy)
-                if Gracz.niezniszczalność is False:
+                if Gracz.niezniszczalność_bonus is False:
                     punkty.dodawaniePunktów(-100)
                     zdrowie.zmianaHp(-20)
             enemy.ruchPrzeciwnika()
@@ -814,7 +835,7 @@ while graj:
                             if dźwięk:
                                 sfx_eksplozja_rakiety.play()
             if pocisk.kto_strzelił in ("kosmita", "krążownik"):
-                if pocisk.czyKolizja(gracz) and Gracz.niezniszczalność is False:
+                if pocisk.czyKolizja(gracz) and Gracz.niezniszczalność_bonus is False:
                     pociski_do_usunięcia.append(pocisk)
                     punkty.dodawaniePunktów(-100)
                     strata = -20 if pocisk.kto_strzelił == "kosmita" else -40
@@ -823,14 +844,19 @@ while graj:
                     #tutaj zrobimy stratę hp zależną od typu przeciwnika (to jak zrobimy klasę typów przeciwnika albo wczytywanie pliku)
             for bonus in bonusList:
                 if pocisk.czyKolizja(bonus) and (pocisk.kto_strzelił == "gracz" or pocisk.kto_strzelił == "rakieta") and bonus.nietrafiony:
-                    if bonus.pwr_up == 1:
-                        Gracz.niezniszczalność = True
-                        czas_niezniszczalności = czas
+                    if bonus.pwr_up == 1: #ODPORNOŚĆ
+                        Gracz.niezniszczalność_bonus = True
+                        czas_niezniszczalności_bonus = czas
                         sfx_tarcza_on.play()
-                    elif bonus.pwr_up == 2:
+                    elif bonus.pwr_up == 2: #RAKIETA
                         Gracz.ilość_rakiet += 1
                         sfx_rakieta_bonus.play()
-                    elif bonus.pwr_up == 3:
+                    elif bonus.pwr_up == 3: #PRZEGRZANIE
+                        Gracz.przegrzanie_bonus = True
+                        gracz.aktualne_przegrzanie = gracz.maks_przegrzanie
+                        czas_przegrzanie_bonus = czas
+                        sfx_tarcza_on.play()
+                    elif bonus.pwr_up == 4: #HP
                         zdrowie.zmianaHp(20)
                         sfx_leczenie.play()
                     bonus.nietrafiony = False
@@ -879,8 +905,12 @@ while graj:
         for wybuch in wybuchList:
             wybuch.IleOdWybuchu(czas)
         
-        if czas - czas_niezniszczalności > 10000 and Gracz.niezniszczalność:
-            Gracz.niezniszczalność = False
+        if czas - czas_niezniszczalności_bonus > 10000 and Gracz.niezniszczalność_bonus:
+            Gracz.niezniszczalność_bonus = False
+            sfx_tarcza_off.play()
+        
+        if czas - czas_przegrzanie_bonus > 10000 and Gracz.przegrzanie_bonus:
+            Gracz.przegrzanie_bonus = False
             sfx_tarcza_off.play()
         
         if zdrowie.hp <= 0:
