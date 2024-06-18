@@ -8,13 +8,19 @@ pygame.init()
 ##      GLOBALNE
 ##
 
+# ILOŚĆ RAKIET (DO TESTÓW)
+pakiet_rakiet = 20
+
 # GŁÓWNE
-OKNO_SZER = 1200
-OKNO_WYS = 700
+OKNO_SZER = 720
+OKNO_WYS = 960
 font = pygame.font.Font(None,32)
 fps = 60
 okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
 
+black = pygame.Surface((OKNO_SZER, OKNO_WYS))
+black.set_alpha(255)
+black.fill((0, 0, 0))
 # SPRAJTY
 statek = pygame.image.load(os.path.join("images","statek.png")).convert_alpha()
 icon = pygame.image.load(os.path.join("images","ic_statek.png")).convert_alpha()
@@ -28,12 +34,15 @@ krazownik_1 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png")).c
 krazownik_2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg2.png")).convert_alpha()
 
 pocisk_gracza = pygame.image.load(os.path.join("images","pocisk_gracza.png")).convert_alpha()
+pocisk_gracza1 = pygame.image.load(os.path.join("images","rakieta.png")).convert_alpha()
 pocisk_kosmity = pygame.image.load(os.path.join("images","pocisk_wróg1.png")).convert_alpha()
 pocisk_krazownika = pygame.image.load(os.path.join("images","pocisk2.png")).convert_alpha()
 
 eksplozja = pygame.image.load(os.path.join("images","eksplozja1.png")).convert_alpha()
 eksplozja_1 = pygame.image.load(os.path.join("images","eksplozja2.png")).convert_alpha()
 eksplozja_2 = pygame.image.load(os.path.join("images","eksplozja3.png")).convert_alpha()
+
+bonus_klucz = pygame.image.load(os.path.join("images","klucz_naprawczy.png")).convert_alpha()
 
 but_start = pygame.image.load(os.path.join("images","START.png")).convert_alpha()
 but_start_hover = pygame.image.load(os.path.join("images","START1.png")).convert_alpha()
@@ -55,6 +64,10 @@ bg_kosmos = pygame.image.load(os.path.join("images","kosmos.png")).convert_alpha
 bg_gameover = pygame.image.load(os.path.join("images","game_over.png")).convert_alpha()
 bg_pauza = pygame.image.load(os.path.join("images","pauza.png")).convert_alpha()
 
+bg_intro1 = pygame.image.load(os.path.join("images","intro1.png")).convert()
+
+logo = pygame.image.load(os.path.join("images","logo.png")).convert_alpha()
+
 # DŹWIĘKI
 pygame.mixer.init()
 
@@ -62,20 +75,47 @@ pygame.mixer.init()
 sfx_pocisk = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 sfx_pocisk_wroga = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
 sfx_eksplozja = pygame.mixer.Sound(os.path.join("sounds", "eksplozja.ogg"))
+sfx_rakieta = pygame.mixer.Sound(os.path.join("sounds", "rakieta.mp3"))
+sfx_eksplozja_rakiety = pygame.mixer.Sound(os.path.join("sounds", "eksplozja_rakieta.mp3"))
+sfx_alarm = pygame.mixer.Sound(os.path.join("sounds","alarm.wav"))
+sfx_tsss = pygame.mixer.Sound(os.path.join("sounds","tsss.mp3"))
+
 sfx_pocisk.set_volume(.1)
 sfx_eksplozja.set_volume(.35)
+sfx_rakieta.set_volume(.15)
+sfx_eksplozja_rakiety.set_volume(.1)
+sfx_alarm.set_volume(.1)
+sfx_tsss.set_volume(.2)
 
 # MUZYKA
 mus_gameover = os.path.join("music","game_over.mp3")
 mus_gra = os.path.join("music","muza.mp3")
+mus_menu = os.path.join("music","menu.mp3")
 
-pygame.mixer.music.load(mus_gra)
+pygame.mixer.music.load(mus_menu)
 pygame.mixer.music.set_volume(.25)
 #pygame.mixer.music.play(-1, 0)
 
 ##
 ##      KLASY
 ##
+
+class Tło:
+    def __init__(self, y):
+        self.y = y
+        self.img = bg_kosmos
+
+    def ruchTła(self):
+        self.y += .33
+        if self.y >= OKNO_WYS:
+            self.y = -OKNO_WYS
+
+    def rysujTło(self):
+        self.ruchTła()
+        okienko.blit(self.img, (0, self.y))
+
+TŁO1 = Tło(-OKNO_WYS)
+TŁO2 = Tło(0)
 
 # KLASA BYTU
 class Byt:
@@ -87,7 +127,7 @@ class Byt:
         self.obrazek = obrazek
 
 # KLASA WYBUCH
-class Wybuch():
+class Wybuch:
     """Klasa wybuch lol lmao rofl"""
     def __init__(self, x, y):
         self.img0 = eksplozja
@@ -96,23 +136,32 @@ class Wybuch():
         self.x = x
         self.y = y
         self.miejsce_wybuchu = (self.x + kosmita.get_width()//2 - eksplozja.get_width()//2, self.y + kosmita.get_height()//2 - eksplozja.get_height()//2)
+        self.miejsce_wybuchu1 = (self.x + pocisk_gracza1.get_width()//2 - (eksplozja.get_width()//2)*2, self.y + pocisk_gracza1.get_height()//2 - (eksplozja.get_height()//2)*2)
     
-    def CzyWybuch(self, x, y, ticks_wybuchu):
+    def CzyWybuch(self, x, y, ticks_wybuchu, T_F):
         self.x = x
         self.y = y
         self.czas = ticks_wybuchu
+        self.rakieta = T_F
     
     def IleOdWybuchu(self, czas_od_wybuchu):
-        
-
         if czas_od_wybuchu - self.czas <= 225:
             if czas_od_wybuchu - self.czas <= 150:
                 if czas_od_wybuchu - self.czas <= 75:
-                    okienko.blit(self.img0, self.miejsce_wybuchu)
+                    if self.rakieta:
+                        okienko.blit(pygame.transform.smoothscale(self.img0, [self.img0.get_width()*2, self.img0.get_height()*2]), self.miejsce_wybuchu1)
+                    else:
+                        okienko.blit(self.img0, self.miejsce_wybuchu)
                     return
-                okienko.blit(self.img1, self.miejsce_wybuchu)
+                if self.rakieta:
+                    okienko.blit(pygame.transform.smoothscale(self.img0, [self.img0.get_width()*2, self.img0.get_height()*2]), self.miejsce_wybuchu1)
+                else:
+                    okienko.blit(self.img1, self.miejsce_wybuchu)
                 return
-            okienko.blit(self.img2, self.miejsce_wybuchu)
+            if self.rakieta:
+                okienko.blit(pygame.transform.smoothscale(self.img0, [self.img0.get_width()*2, self.img0.get_height()*2]), self.miejsce_wybuchu1)
+            else:
+                okienko.blit(self.img2, self.miejsce_wybuchu)
             return
         
         else: wybuchList.remove(self)
@@ -133,6 +182,12 @@ class Przycisk(Byt):
             return True
         return False
     
+    def ustawPrzycisk(self, x : float, y : float):
+        """Ustawia przycisk na zadane koordynaty."""
+        self.x = x
+        self.y = y
+        self.mask.topleft = (x, y)
+    
     def rysujPrzycisk(self):
         """Wyświetla przycisk w okienku."""
         if self.czyMyszka():
@@ -140,11 +195,44 @@ class Przycisk(Byt):
         else:
             okienko.blit(self.obrazek, (self.mask.x, self.mask.y))
 
+# KLASA BONUSY
+class Bonusy(Byt):
+    stworzone_bonusy = 0
+
+    dx = 0
+    dy = 0
+
+    def __init__(self, x:float = 0, y:float = 0):
+        self.x = x
+        self.y = y
+        self.obraz = bonus_klucz
+        self.speed = 2.5
+
+        mask = pygame.mask.from_surface(self.obraz)
+        Byt.__init__(self, x, y, mask, self.obraz)
+        self.szer = self.obrazek.get_width()
+        self.wys = self.obrazek.get_width()
+
+    def rysujBonus(self):
+        okienko.blit(self.obraz,(self.x,self.y))
+
+    def ruchBonusu(self):
+        self.dx = self.speed
+        self.x -= self.dx
+        self.dy = (self.speed*math.sin(czas_ruch_bonusu/10))
+        self.y -= self.dy
+    
+    def ustawBonus(self, x , y):
+        self.x = OKNO_SZER
+        self.y = OKNO_WYS//2
+
 # KLASA GRACZ
 class Gracz(Byt):
     """Klasa zawierająca funkcjonalność i anatomię gracza."""
     cooldown_strzalu = 125
-
+    cooldown_rakiety = 500
+    ilość_rakiet = pakiet_rakiet
+    
     def __init__(self):
         mask = pygame.mask.from_surface(statek)
         Byt.__init__(self, 0, 0, mask, statek)
@@ -154,7 +242,7 @@ class Gracz(Byt):
         self.dy = 0
         self.predkosc = 10
         self.maks_przegrzanie = 100
-        self.aktualne_przegrzanie = 0
+        self.aktualne_przegrzanie = self.maks_przegrzanie
         self.cooldown_przegrzania = 0
 
     def ustawGracza(self, x, y):
@@ -221,26 +309,48 @@ class Gracz(Byt):
                     sfx_pocisk.play()
                 return True
         return False
+    
+    def wystrzelRakiete(self):
+        """Pozwala graczowi wystrzelić rakietę, zwraca prawdę jeśli ją wystrzeli."""
+        if czas_od_rakiety > Gracz.cooldown_rakiety:
+            if keys[pygame.K_LSHIFT] and Gracz.ilość_rakiet > 0:
+                pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, 15, "rakieta"))
+                Gracz.ilość_rakiet += -1
+                if dźwięk:
+                    sfx_rakieta.play()
+                return True
+        return False
+    
     def przegrzanie(self):
-        poziom_przegrzania = self.aktualne_przegrzanie / self.maks_przegrzanie
+        self.poziom_przegrzania = self.aktualne_przegrzanie / self.maks_przegrzanie     
+
         if keys[pygame.K_SPACE]:
             if self.cooldown_przegrzania == 0:
-                self.aktualne_przegrzanie += 0.8
+                self.aktualne_przegrzanie -= .5
+            elif self.aktualne_przegrzanie > self.maks_przegrzanie:
+                    self.aktualne_przegrzanie = self.maks_przegrzanie
+                    self.cooldown_przegrzania = 0
             else:
-                self.aktualne_przegrzanie -= 0.5
-            if self.aktualne_przegrzanie > self.maks_przegrzanie:
-                self.aktualne_przegrzanie = self.maks_przegrzanie
-                self.cooldown_przegrzania = 10000000
-        else:
-            self.aktualne_przegrzanie -= 0.5
+                self.aktualne_przegrzanie += 1
             if self.aktualne_przegrzanie < 0:
                 self.aktualne_przegrzanie = 0
+                self.cooldown_przegrzania = 1000000
+                sfx_alarm.stop()
+                #sfx_tsss.play()
+            if self.aktualne_przegrzanie == 30.5:
+                sfx_alarm.play()
+        else:
+            if self.aktualne_przegrzanie > 30.5:
+                sfx_alarm.stop()
+            self.aktualne_przegrzanie += 2
+            if self.aktualne_przegrzanie > self.maks_przegrzanie:
+                self.aktualne_przegrzanie = self.maks_przegrzanie
                 self.cooldown_przegrzania = 0
-        pygame.draw.rect(okienko, "gray", (self.x +125, self.y +7, 13, 120))
-        pygame.draw.rect(okienko, "orange", (self.x +125, self.y +7 , 13, 120 * poziom_przegrzania))
+        pygame.draw.rect(okienko, "orange", (self.x +125, self.y +7, 13, 120))
+        pygame.draw.rect(okienko, "gray", (self.x +125, self.y +7 , 13, 120 * self.poziom_przegrzania))
 
 # KLASA PUNKTY GRACZA
-class Scoreboard():
+class Scoreboard:
     def __init__(self):
         self.wynik = 0
         try:
@@ -272,7 +382,7 @@ class Scoreboard():
                 rekord.write(str(self.wynik))
 
 # KLASA ŻYCIE GRACZA
-class PasekZdrowia():
+class PasekZdrowia:
     def __init__(self, max_hp):
         self.hp = max_hp
         self.max_hp = max_hp
@@ -280,9 +390,9 @@ class PasekZdrowia():
     def rysujPasek(self):
         """Pojawia pasek zdrowia na ekranie."""
         poziom_hp = self.hp / self.max_hp
-        pygame.draw.rect(okienko, "red", (10, 660, 300, 30))
-        pygame.draw.rect(okienko, "green", (10, 660, 300 * poziom_hp, 30))
-        okienko.blit(font.render("HP",True,'green'),(140,630))
+        pygame.draw.rect(okienko, "red", (10, OKNO_WYS - 40, 300, 30))
+        pygame.draw.rect(okienko, "green", (10, OKNO_WYS - 40, 300 * poziom_hp, 30))
+        okienko.blit(font.render("HP",True,'green'),(140,OKNO_WYS - font.get_height() - 40))
         
     def zmianaHp(self, wartosc:float):
         """Zmienia hp na zadaną wartość."""
@@ -373,12 +483,15 @@ class Pocisk(Byt):
             obrazek = pocisk_kosmity
         if kto_strzelił == "krążownik":
             obrazek = pocisk_krazownika
+        if kto_strzelił == "rakieta":
+            obrazek = pocisk_gracza1
 
         mask = pygame.mask.from_surface(obrazek)  # mask tworzy dokładną siatkę pikseli wgranego obrazu
 
         Byt.__init__(self, x - obrazek.get_width()//2, y - obrazek.get_height()//2, mask, obrazek)
         self.predkosc = predkosc
         self.kto_strzelił = kto_strzelił
+        self.czas_płynny_ruch_rakiety = 0
     
     def rysujPocisk(self):
         """Rysuje pocisk."""
@@ -390,6 +503,9 @@ class Pocisk(Byt):
         """Przemieszcza pocisk."""
         if self.kto_strzelił == "gracz":
             self.y -= self.predkosc  # pocisk porusza się pionowo do góry (gracz)
+        elif self.kto_strzelił == "rakieta":
+            self.czas_płynny_ruch_rakiety += dt/17
+            self.y -= self.predkosc * self.czas_płynny_ruch_rakiety / fps *.5
         else:
             self.y += self.predkosc # pocisk porusza się pionowo do dołu (wrog1)
     
@@ -407,12 +523,16 @@ class Pocisk(Byt):
         return kolizja(self, obiekt)
 
 # KLASA SCENA
-class Scena():
+class Scena:
     obecna_scena = None
 
     def __init__(self, tag:str, przyciski:list[Przycisk] = []):
         self.tag = tag
         self.przyciski = przyciski
+        if self.tag == "MENU":
+            self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - przyciski[0].obrazek.get_height() - 50)
+            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + przyciski[1].obrazek.get_height() - 50)
+            self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* przyciski[2].obrazek.get_height() - 20)
 
     def rysujPrzyciski(self):
         for przycisk in self.przyciski:
@@ -436,6 +556,9 @@ cykl_pojawienia_przeciwnika = 1000 #(milisekundy) <----------- TUTAJ BYM COŚ PR
 pojaw_przeciwnika = pygame.USEREVENT
 pygame.time.set_timer(pojaw_przeciwnika, cykl_pojawienia_przeciwnika)
 
+cykl_pojawienia_bonusu = 2000 #(2 sekundy)
+pojaw_bonus = pygame.USEREVENT + 1
+pygame.time.set_timer(pojaw_bonus, cykl_pojawienia_bonusu)   #<----- PROBLEM W TEJ LINII
 # # przeciwnik będzie strzelał co jakiś czas (niewykorzystane)
 # cykl_strzał_wróg1 = 200
 # strzał_wróg1 = pygame.USEREVENT + 1
@@ -446,18 +569,22 @@ pygame.time.set_timer(pojaw_przeciwnika, cykl_pojawienia_przeciwnika)
 ##*************************##
 
 pygame.display.set_icon(icon)
-#okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
 podział_okienka = range(0, OKNO_SZER - kosmita.get_width(), kosmita.get_width())
-pygame.display.set_caption("Student Invaders")
+podział_okienka_bonus = range(OKNO_WYS//2, OKNO_SZER - bonus_klucz.get_width(), bonus_klucz.get_width())
+pygame.display.set_caption("STUDENT INVADERS")
 zegarek = pygame.time.Clock()
 
 # LISTY
 enemyList = list[Przeciwnik]()          # lista przeciwników
 pociskList = list[Pocisk]()             # lista pocisków
 wybuchList = list[Wybuch]()             # lista wybuchów
+bonusList = list[Bonusy]()              # lista bonusów
 
 czas_od_pocisku = 0
+czas_od_rakiety = 0
 czas_płynny_ruch_przeciwnika = 0
+czas_ruch_bonusu = 0
+czas_intro = 0
 
 # funkcja sprawdzająca kolizję obiektów
 def kolizja(obiekt1, obiekt2):
@@ -473,8 +600,8 @@ WYJDŹ = Przycisk(200, 200, but_wyjscie, but_wyjscie_hover)
 START = Przycisk(0, 0, but_start, but_start_hover)
 EXIT = Przycisk(450, 0, but_wyjscie, but_wyjscie_hover)
 INSTRUKCJA = Przycisk(0, 500, but_instrukcje, but_instrukcje_hover)
-DŹWIĘK_ON = Przycisk(450, 500, but_dzwiek_enabled, but_dzwiek_enabled_hover)
-DŹWIĘK_OFF = Przycisk(450, 500, but_dzwiek_disabled, but_dzwiek_disabled_hover)
+DŹWIĘK_ON = Przycisk(OKNO_SZER - but_dzwiek_enabled.get_width() - 10, OKNO_WYS - but_dzwiek_enabled.get_height() - 10, but_dzwiek_enabled, but_dzwiek_enabled_hover)
+DŹWIĘK_OFF = Przycisk(OKNO_SZER - but_dzwiek_disabled.get_width() - 10, OKNO_WYS - but_dzwiek_disabled.get_height() - 10, but_dzwiek_disabled, but_dzwiek_disabled_hover)
 DŹWIĘKI=[DŹWIĘK_ON, DŹWIĘK_OFF]
 DŹWIĘK = DŹWIĘK_ON
 dźwięk = True
@@ -484,13 +611,14 @@ WYJDŹ_PONOWNIE = Przycisk(0, 400, but_wyjscie, but_wyjscie_hover)
 GRAJ_PONOWNIE = Przycisk(400, 0, but_start, but_start_hover)
 
 # SCENY
+SCENA_INTRO = Scena("INTRO")
 SCENA_MENU = Scena("MENU", [START, INSTRUKCJA, EXIT])
 SCENA_GRA = Scena("GRA")
 SCENA_INSTRUKCJE = Scena("INSTRUKCJE", [INSTRUKCJA])
 SCENA_PAUZA = Scena("PAUZA", [WZNÓW, WYJDŹ])
 SCENA_ŚMIERĆ = Scena("ŚMIERĆ", [MENU_PONOWNIE, WYJDŹ_PONOWNIE, GRAJ_PONOWNIE])
 
-Scena.obecna_scena = SCENA_MENU
+Scena.obecna_scena = SCENA_INTRO
 
 # GRA
 scena : Scena = Scena.obecna_scena
@@ -506,10 +634,20 @@ while graj:
     for zdarzenie in zdarzenia:
         if zdarzenie.type == pygame.QUIT:
             graj = False
-    
-    if scena == SCENA_MENU:
-        okienko.fill('black')
-
+    if scena == SCENA_INTRO:
+        okienko.blit(bg_intro1, (0, 0))
+        black.set_alpha(255 * (1 - math.sin(czas_intro/1050)))
+        print(black.get_alpha())
+        okienko.blit(black, (0, 0))
+        czas_intro += dt
+        if czas_intro > 3000:
+            Scena.obecna_scena = SCENA_MENU
+            pygame.mixer.music.play()
+    elif scena == SCENA_MENU:
+        TŁO1.rysujTło()
+        TŁO2.rysujTło()
+        
+        okienko.blit(logo, (OKNO_SZER//2 - logo.get_width()//2, 10))
         scena.rysujPrzyciski()
         DŹWIĘK.rysujPrzycisk()
         
@@ -522,7 +660,8 @@ while graj:
             if zdarzenie.type == pygame.MOUSEBUTTONUP:
                 if START.czyMyszka():
                     if dźwięk:
-                        pygame.mixer.music.play(-1, 0)
+                        pygame.mixer.music.load(mus_gra)
+                        pygame.mixer.music.play()
                     Scena.obecna_scena = SCENA_GRA
                 if EXIT.czyMyszka():
                     graj = False
@@ -535,7 +674,8 @@ while graj:
                 if INSTRUKCJA.czyMyszka():
                     Scena.obecna_scena = SCENA_INSTRUKCJE
     elif scena == SCENA_INSTRUKCJE:
-        okienko.blit(bg_instrukcje, (0, 0))
+        TŁO1.rysujTło()
+        TŁO2.rysujTło()
         scena.rysujPrzyciski()
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.KEYDOWN:
@@ -552,6 +692,11 @@ while graj:
                 gdzie_przeciwnik = random.choice(podział_okienka)
                 przeciwnik.ustawPrzeciwnika(gdzie_przeciwnik, - przeciwnik.wys - 2)
                 enemyList.append(przeciwnik)
+            if zdarzenie.type == pojaw_bonus:
+                bonus = Bonusy()
+                gdzie_bonus = random.choice(podział_okienka_bonus)
+                bonus.ustawBonus(gdzie_bonus, OKNO_WYS//2)
+                bonusList.append(bonus)
             if zdarzenie.type == pygame.KEYDOWN:
                 if zdarzenie.key == pygame.K_ESCAPE:
                     Scena.obecna_scena = SCENA_PAUZA
@@ -565,8 +710,11 @@ while graj:
             #         random.choice(enemyList).wystrzelPocisk1()
 
         # WYKONUJE SIĘ NA KAŻDY TICK
-        okienko.blit(bg_kosmos, (0,0))
+        TŁO1.rysujTło()
+        TŁO2.rysujTło()
         czas_od_pocisku += dt
+        czas_od_rakiety += dt
+        czas_ruch_bonusu += dt/20
         czas_płynny_ruch_przeciwnika += dt/17
         #print(czas_płynny_ruch_przeciwnika)
 
@@ -575,6 +723,12 @@ while graj:
         
         if czas_od_pocisku > 2000:
             czas_od_pocisku = Gracz.cooldown_strzalu
+
+        if gracz.wystrzelRakiete():
+            czas_od_rakiety = 0
+        
+        if czas_od_rakiety > 5000:
+            czas_od_rakiety = Gracz.cooldown_rakiety
         
         enemy_do_usunięcia = []
         strzelający_przeciwnik = random.randint(0, 300)
@@ -587,19 +741,34 @@ while graj:
                 zdrowie.zmianaHp(-20)
             enemy.ruchPrzeciwnika()
             enemy.rysujPrzeciwnika()
+
+        czas = pygame.time.get_ticks()
+        czy_rakieta_wybucha = False
+
+        for bonus in bonusList:
+            bonus.ruchBonusu()
+            bonus.rysujBonus()
+
+        bonusy_do_usunięcia = []
         
         pociski_do_usunięcia = []
         for pocisk in pociskList:
             pocisk.ruchPocisku()
             pocisk.rysujPocisk()
-            if pocisk.kto_strzelił == "gracz":
+            if pocisk.kto_strzelił == "gracz" or pocisk.kto_strzelił == "rakieta":
                 for enemy in enemyList:
                     if pocisk.czyKolizja(enemy):
                         pociski_do_usunięcia.append(pocisk)
-                        enemy.hp += -1
-                        if enemy.hp == 0:
-                            punkty.dodawaniePunktów(200)
-                            enemy_do_usunięcia.append(enemy)
+                        if pocisk.kto_strzelił == "gracz":
+                            enemy.hp += -1
+                        if pocisk.kto_strzelił == "rakieta":
+                            czy_rakieta_wybucha = True
+                            wybuch = Wybuch(pocisk.x, pocisk.y)
+                            wybuch.CzyWybuch(pocisk.x, pocisk.y, czas, True)
+                            wybuchList.append(wybuch)
+                            (x0, y0) = (pocisk.x + pocisk_gracza1.get_width()//2, pocisk.y + pocisk_gracza1.get_height()//2)
+                            if dźwięk:
+                                sfx_eksplozja_rakiety.play()
             if pocisk.kto_strzelił in ("kosmita", "krążownik"):
                 if pocisk.czyKolizja(gracz):
                     pociski_do_usunięcia.append(pocisk)
@@ -608,12 +777,26 @@ while graj:
                     zdrowie.zmianaHp(strata)
                     #^^^^^^^^^^^^^^^^^^
                     #tutaj zrobimy stratę hp zależną od typu przeciwnika (to jak zrobimy klasę typów przeciwnika albo wczytywanie pliku)
-        
-        czas = pygame.time.get_ticks()
+            for bonus in bonusList:
+                if pocisk.czyKolizja(bonus):
+                    bonusy_do_usunięcia.append(bonus)
+
+        if czy_rakieta_wybucha:
+            for enemy in enemyList:
+                if ((enemy.x + enemy.obraz.get_width()//2) - x0)**2 + ((enemy.y + enemy.obraz.get_height()//2) - y0)**2 <= (eksplozja.get_height())**2:
+                    enemy.hp += -5
+                if enemy.hp <= 0:
+                    punkty.dodawaniePunktów(200)
+                    enemy_do_usunięcia.append(enemy)
+        else:
+            for enemy in enemyList:
+                if enemy.hp <= 0:
+                    punkty.dodawaniePunktów(200)
+                    enemy_do_usunięcia.append(enemy)
         
         for enemy in enemy_do_usunięcia:
             wybuch = Wybuch(enemy.x, enemy.y)
-            wybuch.CzyWybuch(enemy.x, enemy.y, czas)
+            wybuch.CzyWybuch(enemy.x, enemy.y, czas, False)
             wybuchList.append(wybuch)
             if dźwięk:
                 sfx_eksplozja.play()
@@ -644,12 +827,16 @@ while graj:
             punkty.wynik = 0
             zdrowie.hp = zdrowie.max_hp
             #gracz = Gracz()
+            Gracz.ilość_rakiet = pakiet_rakiet
+            gracz.aktualne_przegrzanie = gracz.maks_przegrzanie
             gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
-            Przeciwnik.stworzonych_przeciwnikow = 0
 
-            enemyList = []
-            pociskList = []
-            wybuchList = []          #Czyścimy listy, aby przeciwnicy, wybuchy oraz pociski z poprzedniej rundy nie pojawiali się w nowej
+            Przeciwnik.stworzonych_przeciwnikow = 0
+            
+            enemyList.clear()
+            pociskList.clear()
+            bonusList.clear()
+            wybuchList.clear()       #Czyścimy listy, aby przeciwnicy, wybuchy oraz pociski z poprzedniej rundy nie pojawiali się w nowej
     elif scena == SCENA_PAUZA:
         okienko.blit(bg_pauza, (0, 0))
         scena.rysujPrzyciski()
@@ -685,7 +872,8 @@ while graj:
                 elif MENU_PONOWNIE.czyMyszka():
                     Scena.obecna_scena = SCENA_MENU
                     pygame.mixer.stop()
-                    pygame.mixer.music.load(mus_gra)
+                    pygame.mixer.music.load(mus_menu)
+                    pygame.mixer.music.play()
                 elif GRAJ_PONOWNIE.czyMyszka():
                     Scena.obecna_scena = SCENA_GRA
                     
