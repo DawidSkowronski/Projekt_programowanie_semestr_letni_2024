@@ -13,7 +13,7 @@ pakiet_rakiet = 20
 
 # GŁÓWNE
 OKNO_SZER = 720
-OKNO_WYS = 960
+OKNO_WYS = 760
 font = pygame.font.Font(None,32)
 fps = 60
 okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
@@ -24,6 +24,8 @@ black.fill((0, 0, 0))
 # SPRAJTY
 statek = pygame.image.load(os.path.join("images","statek.png")).convert_alpha()
 icon = pygame.image.load(os.path.join("images","ic_statek.png")).convert_alpha()
+bariera = pygame.image.load(os.path.join("images","bariera.png")).convert_alpha()
+
 
 kosmita = pygame.image.load(os.path.join("images","kosmita.png")).convert_alpha()
 kosmita_1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png")).convert_alpha()
@@ -234,11 +236,11 @@ class Bonusy(Byt):
             Bonusy.poprzedni_pwr_up = self.pwr_up
         #print(Bonusy.poprzedni_pwr_up)
         if self.pwr_up == 1:
-            self.obraz = pocisk_kosmity
+            self.obraz = bonus_klucz
         elif self.pwr_up == 2:
             self.obraz = pocisk_gracza1
         elif self.pwr_up == 3:
-            self.obraz = pocisk_krazownika
+            self.obraz = bonus_klucz
         elif self.pwr_up == 4:
             self.obraz = bonus_klucz
         
@@ -284,12 +286,14 @@ class Gracz(Byt):
     niezniszczalność_bonus = False
     przegrzanie_bonus = False
     
-    def __init__(self):
+    def __init__(self):        
+        
         mask = pygame.mask.from_surface(statek)
         Byt.__init__(self, 0, 0, mask, statek)
+        
         self.szer = self.obrazek.get_width()
         self.wys = self.obrazek.get_height()
-        self.obrazek1 = but_start
+        self.obrazek1 = bariera
         self.dx = 0
         self.dy = 0
         self.predkosc = 10
@@ -302,12 +306,23 @@ class Gracz(Byt):
         self.x = x
         self.y = y
 
-    def rysujGracza(self):
-        """Rysuje instancję gracza."""
-        if Gracz.niezniszczalność_bonus:
-            okienko.blit(self.obrazek1, (self.x,self.y))
-            return
+    def rysujGracza(self):           
+        """Rysuje instancję gracza."""        
+
+        #mask_bariera = pygame.mask.from_surface(bariera)
+        #self.bariera_byt = Byt(gracz.x, gracz.y, mask_bariera)   
+
+        #mask_bariera = pygame.mask.from_surface(bariera)
+        #bariera_byt = Byt(gracz.x,gracz.y, mask_bariera)
+
         okienko.blit(self.obrazek, (self.x,self.y))
+        if Gracz.niezniszczalność_bonus:
+            okienko.blit(self.obrazek1, (self.x-35,self.y-35))
+            #self.mask = self.bariera_byt
+        
+        
+
+            
 
     def przesuńGracza(self):
         """Zmienia koordynaty gracza."""
@@ -676,7 +691,7 @@ gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 ##  ZDARZENIA
 ##
 
-cykl_pojawienia_pwr_up = 15
+cykl_pojawienia_pwr_up = 2
 
 ##*************************##
 ##           GRA           ##
@@ -923,6 +938,10 @@ while graj:
                     zdrowie.zmianaHp(strata)
                     #^^^^^^^^^^^^^^^^^^
                     #tutaj zrobimy stratę hp zależną od typu przeciwnika (to jak zrobimy klasę typów przeciwnika albo wczytywanie pliku)
+                #if kolizja(pocisk,bariera):
+                #    pociski_do_usunięcia.append(pocisk)
+
+
             for bonus in bonusList:
                 if pocisk.czyKolizja(bonus) and (pocisk.kto_strzelił == "gracz" or pocisk.kto_strzelił == "rakieta") and bonus.nietrafiony:
                     if bonus.pwr_up == 1: #ODPORNOŚĆ
@@ -986,7 +1005,7 @@ while graj:
         for wybuch in wybuchList:
             wybuch.IleOdWybuchu(czas)
         
-        if czas - czas_niezniszczalności_bonus > 10000 and Gracz.niezniszczalność_bonus:
+        if czas - czas_niezniszczalności_bonus > 1000000 and Gracz.niezniszczalność_bonus:
             Gracz.niezniszczalność_bonus = False
             sfx_tarcza_off.play()
         
