@@ -29,6 +29,9 @@ kosmita = pygame.image.load(os.path.join("images","kosmita.png")).convert_alpha(
 kosmita_1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png")).convert_alpha()
 kosmita_2 = pygame.image.load(os.path.join("images","kosmita_dmg2.png")).convert_alpha()
 
+kamikaze = pygame.image.load(os.path.join("images","kamikaze.png")).convert_alpha()
+kamikaze_szarza = pygame.image.load(os.path.join("images","kamikaze_szarża.png"))
+
 krazownik = pygame.image.load(os.path.join("images","przeciwnik2.png")).convert_alpha()
 krazownik_1 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png")).convert_alpha()
 krazownik_2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg2.png")).convert_alpha()
@@ -469,29 +472,36 @@ class Przeciwnik(Byt):
     dx = 0
     dy = 0
 
-    def __init__(self, x:float = 0, y:float = 0):
+    def __init__(self, x:float = 0, y:float = 0, typ:str = "kosmita", czas_powstania:float = 0):
         # ID PRZECIWNIKA
         self.id = Przeciwnik.stworzonych_przeciwnikow
+        self.tag = typ
         Przeciwnik.stworzonych_przeciwnikow += 1
         self.ruch_offset = czas_płynny_ruch_przeciwnika
 
-        if Przeciwnik.stworzonych_przeciwnikow % 5 == 0:
-            self.tag = "krążownik"
+        if self.tag == "krążownik":
             self.obraz = krazownik
             self.obraz_1 = krazownik_1
             self.obraz_2 = krazownik_2
-            self.speed = 0.5
-            self.pocisk_speed = 5
-            self.hp = 7
-        else:
-            self.tag = "kosmita"
+            self.speed = 1
+            self.pocisk_speed = 10
+            self.hp = 15
+        elif self.tag == "kosmita":
             self.obraz = kosmita
             self.obraz_1 = kosmita_1
             self.obraz_2 = kosmita_2
             self.speed = 3
-            self.pocisk_speed = 10
+            self.pocisk_speed = 15
             self.hp = 5
+        elif self.tag == "kamikaze":
+            self.obraz = kamikaze
+            self.obraz_1 = kamikaze
+            self.obraz_2 = kamikaze_szarza
+            self.speed = 3
+            self.pocisk_speed = 0
+            self.hp = 4
 
+        self.czas_powstania = czas_powstania
         mask = pygame.mask.from_surface(self.obraz)
         Byt.__init__(self, x, y, mask, self.obraz)
         
@@ -512,7 +522,20 @@ class Przeciwnik(Byt):
 
     def ruchPrzeciwnika(self):
         """Zmienia koordynaty przeciwnika."""
-        self.dy = self.speed * abs(math.sin(2*czas_płynny_ruch_przeciwnika/fps + self.ruch_offset%fps)) + .5
+        if self.tag == "kamikaze":
+            czas_zachowania = czas - self.czas_powstania
+            print(czas_zachowania)
+            if czas_zachowania < 500:
+                self.dy = self.speed * 4*math.cos(math.radians(czas_zachowania//5.5))
+            elif czas_zachowania < 800:
+                self.dy = self.speed/2 * math.cos(math.radians(czas_zachowania//5.5))
+            else:
+                self.hp = 2
+                self.dy += self.speed/10
+        elif self.tag == "krążownik":
+            self.dy = self.speed
+        elif self.tag == "kosmita":
+            self.dy = self.speed * abs(math.sin(2*czas_płynny_ruch_przeciwnika/fps + self.ruch_offset%fps)) + .5
 
         self.y += self.dy
 
@@ -523,6 +546,8 @@ class Przeciwnik(Byt):
 
     def wystrzelPocisk(self):
         """Pozwala przeciwnikowi wystrzelić pocisk"""
+        if self.tag == "kamikaze":
+            return False
         pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, self.pocisk_speed, self.tag))
         #if dźwięk: dźwięk_wróg1.play()
         return True
@@ -538,11 +563,11 @@ class Pocisk(Byt):
     def __init__(self, x:float, y:float, predkosc:float, kto_strzelił:str):
         if kto_strzelił == "gracz":
             obrazek = pocisk_gracza
-        if kto_strzelił == "kosmita":
+        elif kto_strzelił == "kosmita":
             obrazek = pocisk_kosmity
-        if kto_strzelił == "krążownik":
+        elif kto_strzelił == "krążownik":
             obrazek = pocisk_krazownika
-        if kto_strzelił == "rakieta":
+        elif kto_strzelił == "rakieta":
             obrazek = pocisk_gracza1
 
         mask = pygame.mask.from_surface(obrazek)  # mask tworzy dokładną siatkę pikseli wgranego obrazu
@@ -581,9 +606,46 @@ class Pocisk(Byt):
         """Sprawdza, czy następuje kolizja między pociskiem a obiektem."""
         return kolizja(self, obiekt)
 
+# KLASA FAZA
+class Faza:
+    wszystkie_fazy = 0
+
+    def __init__(self, przeciwnicy:list[str], czestotliwosci:list[tuple], cykl_pojawiania:float):
+        self.przeciwnicy = przeciwnicy
+        self.czestotliwosci = czestotliwosci
+        self.pojaw_przeciwnika = pygame.USEREVENT + 100 + Faza.wszystkie_fazy
+        pygame.time.set_timer(self.pojaw_przeciwnika, cykl_pojawiania)
+
+        Faza.wszystkie_fazy += 1
+
+    def pojawPrzeciwnika(self):
+        for zdarzenie in zdarzenia:
+            if zdarzenie.type == self.pojaw_przeciwnika:
+                rint = random.randint(1,100)
+                i = 0
+                typ_wybrany = self.przeciwnicy[0]
+                print(rint)
+                for typ in self.przeciwnicy:
+                    if rint in range(self.czestotliwosci[i][0], self.czestotliwosci[i][1]):
+                        typ_wybrany = typ
+                    i += 1
+                gdzie_przeciwnik = random.choice(podział_okienka)
+                przeciwnik = Przeciwnik(typ=typ_wybrany, czas_powstania=czas)
+                przeciwnik.ustawPrzeciwnika(gdzie_przeciwnik, - przeciwnik.wys - 2)
+                enemyList.append(przeciwnik)
+
+FAZA0 = Faza(["kosmita", "krążownik"], [(1, 80), (81, 100)], 1500)
+FAZA1 = Faza(["kamikaze"], [(1, 100)], 1000)
+FAZA2 = Faza(["kosmita", "kamikaze"], [(1,80), (81, 100)], 1250)
+FAZA3 = Faza(["krążownik", "kamikaze"], [(1, 60), (61, 100)], 1000)
+FAZA4 = Faza(["kosmita"], [(1, 100)], 500)
+FAZA5 = Faza(["kosmita", "krążownik", "kamikaze"], [(1,50),(51,75),(76,100)], 1000)
+FAZA6 = Faza(["kosmita", "kamikaze"], [(1, 10), (11, 90)], 500)
+
 # KLASA SCENA
 class Scena:
     obecna_scena = None
+    faza:Faza = FAZA0
 
     def __init__(self, tag:str, przyciski:list[Przycisk] = []):
         self.tag = tag
@@ -592,10 +654,15 @@ class Scena:
             self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - przyciski[0].obrazek.get_height() - 50)
             self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + przyciski[1].obrazek.get_height() - 50)
             self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* przyciski[2].obrazek.get_height() - 20)
+
     def rysujPrzyciski(self):
         for przycisk in self.przyciski:
             przycisk.rysujPrzycisk()
 
+    @staticmethod
+    def fazaGry():
+        if Scena.obecna_scena == SCENA_GRA:
+            Scena.faza.pojawPrzeciwnika()
 ##
 ##      OBIEKTY
 ##
@@ -608,16 +675,6 @@ gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 ##
 ##  ZDARZENIA
 ##
-
-# pojawia przeciwnika co jakiś czas
-cykl_pojawienia_przeciwnika = 1000 #(milisekundy) <----------- TUTAJ BYM COŚ PRZEROBIŁ JAKOŚ ***************
-pojaw_przeciwnika = pygame.USEREVENT
-pygame.time.set_timer(pojaw_przeciwnika, cykl_pojawienia_przeciwnika)
-
-# # przeciwnik będzie strzelał co jakiś czas (niewykorzystane)
-# cykl_strzał_wróg1 = 200
-# strzał_wróg1 = pygame.USEREVENT + 1
-# pygame.time.set_timer(strzał_wróg1, cykl_strzał_wróg1)
 
 cykl_pojawienia_pwr_up = 15
 
@@ -762,14 +819,23 @@ while graj:
             if zdarzenie.type == pygame.MOUSEBUTTONUP and INSTRUKCJA.czyMyszka():
                 Scena.obecna_scena = SCENA_MENU
     elif scena == SCENA_GRA:
+        Scena.fazaGry()
+        if punkty.wynik < 30000:
+            if punkty.wynik in (5000, 5500):
+                Scena.faza = FAZA1
+            if punkty.wynik in (10000, 10500):
+                Scena.faza = FAZA2
+            if punkty.wynik in (15000, 15500):
+                Scena.faza = FAZA3
+            if punkty.wynik in (20000, 20500):
+                Scena.faza = FAZA4
+            if punkty.wynik in (25000, 25500):
+                Scena.faza = FAZA5
+        else:
+            if punkty.wynik % 10000 in range(0, 399):
+                random_faza = random.choice([FAZA4, FAZA5, FAZA6])
+                Scena.faza = random_faza
         for zdarzenie in zdarzenia:
-            if zdarzenie.type == pygame.QUIT:
-                graj = False
-            if zdarzenie.type == pojaw_przeciwnika: #pauza is False po to, aby przeciwnicy nie generowali się w trakcie pauzy
-                przeciwnik = Przeciwnik()
-                gdzie_przeciwnik = random.choice(podział_okienka)
-                przeciwnik.ustawPrzeciwnika(gdzie_przeciwnik, - przeciwnik.wys - 2)
-                enemyList.append(przeciwnik)
             if zdarzenie.type == pygame.KEYDOWN:
                 if zdarzenie.key == pygame.K_ESCAPE:
                     Scena.obecna_scena = SCENA_PAUZA
@@ -886,7 +952,7 @@ while graj:
         if czy_rakieta_wybucha:
             for enemy in enemyList:
                 if ((enemy.x + enemy.obraz.get_width()//2) - x0)**2 + ((enemy.y + enemy.obraz.get_height()//2) - y0)**2 <= (eksplozja.get_height())**2:
-                    enemy.hp += -5
+                    enemy.hp += -14
                 if enemy.hp <= 0:
                     punkty.dodawaniePunktów(200)
                     enemy_do_usunięcia.append(enemy)
