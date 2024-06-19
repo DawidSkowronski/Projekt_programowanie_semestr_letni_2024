@@ -13,7 +13,7 @@ pakiet_rakiet = 20
 
 # GŁÓWNE
 OKNO_SZER = 720
-OKNO_WYS = 760
+OKNO_WYS = 960
 font = pygame.font.Font(None,32)
 fps = 60
 okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
@@ -293,7 +293,8 @@ class Gracz(Byt):
         
         self.szer = self.obrazek.get_width()
         self.wys = self.obrazek.get_height()
-        self.obrazek1 = bariera
+        maska_bariery = pygame.mask.from_surface(bariera)
+        self.bariera = Byt(1200, 1200, maska_bariery, bariera)
         self.dx = 0
         self.dy = 0
         self.predkosc = 10
@@ -308,21 +309,14 @@ class Gracz(Byt):
 
     def rysujGracza(self):           
         """Rysuje instancję gracza."""        
-
-        #mask_bariera = pygame.mask.from_surface(bariera)
-        #self.bariera_byt = Byt(gracz.x, gracz.y, mask_bariera)   
-
-        #mask_bariera = pygame.mask.from_surface(bariera)
-        #bariera_byt = Byt(gracz.x,gracz.y, mask_bariera)
-
         okienko.blit(self.obrazek, (self.x,self.y))
         if Gracz.niezniszczalność_bonus:
-            okienko.blit(self.obrazek1, (self.x-35,self.y-35))
-            #self.mask = self.bariera_byt
-        
-        
-
-            
+            self.bariera.x = self.x - 35
+            self.bariera.y = self.y - 35
+            okienko.blit(self.bariera.obrazek, (self.bariera.x, self.bariera.y))
+        else:
+            self.bariera.x = 1200
+            self.bariera.y = 1200
 
     def przesuńGracza(self):
         """Zmienia koordynaty gracza."""
@@ -916,7 +910,7 @@ while graj:
         for pocisk in pociskList:
             pocisk.ruchPocisku()
             pocisk.rysujPocisk()
-            if pocisk.kto_strzelił == "gracz" or pocisk.kto_strzelił == "rakieta":
+            if pocisk.kto_strzelił in ("gracz", "rakieta"):
                 for enemy in enemyList:
                     if pocisk.czyKolizja(enemy):
                         pociski_do_usunięcia.append(pocisk)
@@ -930,12 +924,15 @@ while graj:
                             (x0, y0) = (pocisk.x + pocisk_gracza1.get_width()//2, pocisk.y + pocisk_gracza1.get_height()//2)
                             if dźwięk:
                                 sfx_eksplozja_rakiety.play()
-            if pocisk.kto_strzelił in ("kosmita", "krążownik"):
+            if pocisk.kto_strzelił in ("kosmita", "krążownik", "kamikaze"):
                 if pocisk.czyKolizja(gracz) and Gracz.niezniszczalność_bonus is False:
                     pociski_do_usunięcia.append(pocisk)
                     punkty.dodawaniePunktów(-100)
                     strata = -20 if pocisk.kto_strzelił == "kosmita" else -40
                     zdrowie.zmianaHp(strata)
+                if pocisk.czyKolizja(gracz.bariera):
+                    pociski_do_usunięcia.append(pocisk)
+                    sfx_leczenie.play()
                     #^^^^^^^^^^^^^^^^^^
                     #tutaj zrobimy stratę hp zależną od typu przeciwnika (to jak zrobimy klasę typów przeciwnika albo wczytywanie pliku)
                 #if kolizja(pocisk,bariera):
