@@ -196,7 +196,7 @@ class Wybuch:
         else: wybuchList.remove(self)
 
 # KLASA PRZYCISK
-class Przycisk(Byt):
+class Przycisk():
     """Klasa zawierająca funkcjonalność przycisków"""
     def __init__(self, but_obrazek, but_obrazek_hover:pygame.Surface = None):
         
@@ -872,9 +872,10 @@ while graj:
     elif scena == SCENA_MENU:
         TŁO1.rysujTło()
         TŁO2.rysujTło()
+        scena.ustaw_i_rysujPrzyciski()
 
         okienko.blit(logo, (OKNO_SZER//2 - logo.get_width()//2, 10))
-        scena.ustaw_i_rysujPrzyciski()
+        Scena.obecna_scena.rysujPrzyciski()
         MUZYKA.rysujPrzycisk()
 
         if puszczono is False and muzyka:
@@ -1148,7 +1149,6 @@ while graj:
             czas_intro += 1
             black.set_alpha(255 * (1 - 2*abs(math.sin(czas_intro/116))))
             okienko.blit(black, (0, 0))
-    
     elif scena == SCENA_PAUZA:
         okienko.blit(bg_pauza, (0, 0))
         scena.ustaw_i_rysujPrzyciski()
@@ -1177,24 +1177,23 @@ while graj:
         czas_intro = 0
 
         for zdarzenie in zdarzenia:
-            if zdarzenie.type == pygame.QUIT:
-                pygame.mixer.stop()
-                punkty.wynik = 0
             if zdarzenie.type == pygame.MOUSEBUTTONUP:
-                punkty.wynik = 0
                 if WYJDŹ.czyMyszka():
                     pygame.mixer.stop()
                     graj = False
                 elif MENU.czyMyszka():
+                    punkty.wynik = 0
                     Scena.obecna_scena = SCENA_MENU
                     pygame.mixer.stop()
                     if muzyka:
                         pygame.mixer.music.load(mus_menu)
                         pygame.mixer.music.play(-1)
                 elif START.czyMyszka():
+                    punkty.wynik = 0
                     Scena.obecna_scena = SCENA_GRA
                     if muzyka:
                         pygame.mixer.music.stop()
                         pygame.mixer.music.load(mus_gra)
+                        pygame.mixer.music.play(-1)
 
 pygame.quit()
