@@ -196,10 +196,11 @@ class Wybuch:
 # KLASA PRZYCISK
 class Przycisk(Byt):
     """Klasa zawierająca funkcjonalność przycisków"""
-    def __init__(self, x, y, but_obrazek:pygame.Surface, but_obrazek_hover:pygame.Surface = None):
-        Byt.__init__(self, x, y, but_obrazek.get_rect(), but_obrazek)
+    def __init__(self, but_obrazek, but_obrazek_hover:pygame.Surface = None):
         
-        self.mask.topleft = (x, y)
+        self.mask = but_obrazek.get_rect()
+
+        self.obrazek = but_obrazek
         self.obrazek_hover = but_obrazek_hover
 
     def czyMyszka(self):
@@ -211,9 +212,8 @@ class Przycisk(Byt):
     
     def ustawPrzycisk(self, x : float, y : float):
         """Ustawia przycisk na zadane koordynaty."""
-        self.x = x
-        self.y = y
-        self.mask.topleft = (x, y)
+        self.mask.x = x
+        self.mask.y = y
     
     def rysujPrzycisk(self):
         """Wyświetla przycisk w okienku."""
@@ -496,6 +496,7 @@ class PasekZdrowia:
 # KLASA PRZECIWNIK
 class Przeciwnik(Byt):
     stworzonych_przeciwnikow = 0
+    pokonanych_przeciwnikow = 0
 
     dx = 0
     dy = 0
@@ -697,31 +698,14 @@ class Scena:
     def __init__(self, tag:str, przyciski:list[Przycisk] = []):
         self.tag = tag
         self.przyciski = przyciski
-        if self.tag == "MENU":
-            self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
-            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
-            self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* self.przyciski[2].obrazek.get_height() - 20)
-        elif self.tag == "INSTRUKCJE":
-            self.przyciski[0].ustawPrzycisk(self.przyciski[0].obrazek.get_width() + 20, OKNO_WYS - self.przyciski[0].obrazek.get_height() - 20)
-        elif self.tag == "PAUZA":
-            self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
-            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
-        elif self.tag == "ŚMIERĆ":
-            self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
-            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
-            self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* self.przyciski[2].obrazek.get_height() - 20)
 
-#SCENA_MENU = Scena("MENU", [START, INSTRUKCJA, EXIT])
-#SCENA_INSTRUKCJE = Scena("INSTRUKCJE", [INSTRUKCJA])
-#SCENA_PAUZA = Scena("PAUZA", [WZNÓW, WYJDŹ])
-#SCENA_ŚMIERĆ = Scena("ŚMIERĆ", [MENU_PONOWNIE, WYJDŹ_PONOWNIE, GRAJ_PONOWNIE])
     def ustawPrzyciski(self):
         if self.tag == "MENU":
             self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
             self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
             self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* self.przyciski[2].obrazek.get_height() - 20)
         elif self.tag == "INSTRUKCJE":
-            self.przyciski[0].ustawPrzycisk(self.przyciski[0].obrazek.get_width() + 20, OKNO_WYS - self.przyciski[0].obrazek.get_height() - 20)
+            self.przyciski[0].ustawPrzycisk(20, OKNO_WYS - self.przyciski[0].obrazek.get_height() - 20)
         elif self.tag == "PAUZA":
             self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
             self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
@@ -731,6 +715,24 @@ class Scena:
             self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* self.przyciski[2].obrazek.get_height() - 20)
 
     def rysujPrzyciski(self):
+        for przycisk in self.przyciski:
+            przycisk.rysujPrzycisk()
+    
+    def ustaw_i_rysujPrzyciski(self):
+        if self.tag == "MENU":
+            self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
+            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
+            self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* self.przyciski[2].obrazek.get_height() - 20)
+        elif self.tag == "INSTRUKCJE":
+            self.przyciski[0].ustawPrzycisk(20, OKNO_WYS - self.przyciski[0].obrazek.get_height() - 20)
+        elif self.tag == "PAUZA":
+            self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
+            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
+        elif self.tag == "ŚMIERĆ":
+            self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
+            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
+            self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* self.przyciski[2].obrazek.get_height() - 20)
+        
         for przycisk in self.przyciski:
             przycisk.rysujPrzycisk()
 
@@ -791,21 +793,20 @@ def kolizja(obiekt1, obiekt2):
 
 
 # PRZYCISKI
-WZNÓW = Przycisk(0, 200, but_kontynuuj, but_kontynuuj_hover)
-WYJDŹ = Przycisk(0, 0, but_wyjscie, but_wyjscie_hover)
-START = Przycisk(200, 0, but_start, but_start_hover)
-EXIT = Przycisk(0, 400, but_wyjscie, but_wyjscie_hover)
-INSTRUKCJA = Przycisk(500, 200, but_instrukcje, but_instrukcje_hover)
-MUZYKA_ON = Przycisk(500, 0, but_dzwiek_enabled, but_dzwiek_enabled_hover)
-MUZYKA_OFF = Przycisk(500, 0, but_dzwiek_disabled, but_dzwiek_disabled_hover)
-MUZYKA_PRZYCISKI = [MUZYKA_ON, MUZYKA_OFF]
+WZNÓW = Przycisk(but_kontynuuj, but_kontynuuj_hover)
+WYJDŹ = Przycisk(but_wyjscie, but_wyjscie_hover)
+START = Przycisk(but_start, but_start_hover)
+EXIT = Przycisk(but_wyjscie, but_wyjscie_hover)
+INSTRUKCJA = Przycisk(but_instrukcje, but_instrukcje_hover)
+MENU = Przycisk(but_dzwiek_enabled, but_dzwiek_enabled_hover)
+MUZYKA_ON = Przycisk(but_dzwiek_enabled, but_dzwiek_enabled_hover)
+MUZYKA_OFF = Przycisk(but_dzwiek_disabled, but_dzwiek_disabled_hover)
+
+MUZYKA_ON.ustawPrzycisk(0, OKNO_WYS - MUZYKA_ON.obrazek.get_height())
+MUZYKA_OFF.ustawPrzycisk(0, OKNO_WYS - MUZYKA_OFF.obrazek.get_height())
 MUZYKA = MUZYKA_ON
 muzyka = True
 puszczono = True
-
-MENU_PONOWNIE = Przycisk(0, 0, but_dzwiek_enabled, but_dzwiek_enabled_hover)
-WYJDŹ_PONOWNIE = Przycisk(0, 200, but_wyjscie, but_wyjscie_hover)
-GRAJ_PONOWNIE = Przycisk(200, 0, but_start, but_start_hover)
 
 # SCENY
 SCENA_INTRO = Scena("INTRO")
@@ -813,7 +814,7 @@ SCENA_MENU = Scena("MENU", [START, INSTRUKCJA, EXIT])
 SCENA_GRA = Scena("GRA")
 SCENA_INSTRUKCJE = Scena("INSTRUKCJE", [INSTRUKCJA])
 SCENA_PAUZA = Scena("PAUZA", [WZNÓW, WYJDŹ])
-SCENA_ŚMIERĆ = Scena("ŚMIERĆ", [MENU_PONOWNIE, GRAJ_PONOWNIE, WYJDŹ_PONOWNIE])
+SCENA_ŚMIERĆ = Scena("ŚMIERĆ", [MENU, START, WYJDŹ])
 
 Scena.obecna_scena = SCENA_INTRO
 
@@ -840,7 +841,6 @@ while graj:
             pygame.mixer.music.load(mus_menu)
             pygame.mixer.music.play(-1)
             Scena.obecna_scena = SCENA_MENU
-            scena.ustawPrzyciski()
             czas_intro = 0
             puszczono = True
         if czas_intro > 370:
@@ -854,7 +854,6 @@ while graj:
                 pygame.mixer.music.load(mus_menu)
                 pygame.mixer.music.play(-1)
                 Scena.obecna_scena = SCENA_MENU
-                scena.ustawPrzyciski()
                 czas_intro = 0
                 puszczono = True
         black.set_alpha(255 * (1 - abs(math.sin(czas_intro/117))))
@@ -865,7 +864,7 @@ while graj:
         TŁO2.rysujTło()
 
         okienko.blit(logo, (OKNO_SZER//2 - logo.get_width()//2, 10))
-        scena.rysujPrzyciski()
+        scena.ustaw_i_rysujPrzyciski()
         MUZYKA.rysujPrzycisk()
 
         if puszczono is False and muzyka:
@@ -904,15 +903,13 @@ while graj:
                         pygame.mixer.music.stop()
                 if INSTRUKCJA.czyMyszka():
                     Scena.obecna_scena = SCENA_INSTRUKCJE
-                    scena.ustawPrzyciski()
     elif scena == SCENA_INSTRUKCJE:
         TŁO1.rysujTło()
         TŁO2.rysujTło()
-        scena.rysujPrzyciski()
+        scena.ustaw_i_rysujPrzyciski()
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.MOUSEBUTTONUP and INSTRUKCJA.czyMyszka():
                 Scena.obecna_scena = SCENA_MENU
-                scena.ustawPrzyciski()
     elif scena == SCENA_GRA:
         Scena.fazaGry()
         if punkty.wynik < 30000:
@@ -934,7 +931,6 @@ while graj:
             if zdarzenie.type == pygame.KEYDOWN:
                 if zdarzenie.key == pygame.K_ESCAPE:
                     Scena.obecna_scena = SCENA_PAUZA
-                    scena.ustawPrzyciski()
                     if muzyka:
                         pygame.mixer.music.set_volume(.03)
                 elif zdarzenie.key == pygame.K_c:
@@ -985,11 +981,11 @@ while graj:
         czas = pygame.time.get_ticks()
         czy_rakieta_wybucha = False
         
-        if Przeciwnik.stworzonych_przeciwnikow == cykl_pojawienia_pwr_up:
+        if Przeciwnik.pokonanych_przeciwnikow == cykl_pojawienia_pwr_up:
             bonus = Bonusy()
             bonus.ustawBonus()
             bonusList.append(bonus)
-            cykl_pojawienia_pwr_up += random.randint(17, 27)
+            cykl_pojawienia_pwr_up += 5 #random.randint(17, 27)
 
         for bonus in bonusList:
             bonus.ruchBonusu()
@@ -1019,11 +1015,11 @@ while graj:
                     pociski_do_usunięcia.append(pocisk)
                     punkty.dodawaniePunktów(-100)
                     if pocisk.kto_strzelił == "kosmita":
-                        strata=-20
+                        strata = -20
                     elif pocisk.kto_strzelił == "szturmowiec":
                         strata = -10
                     else:
-                        strata=-40
+                        strata = -40
                     
                     #strata = -20 if pocisk.kto_strzelił == ("kosmita" or "szturmowiec") elif -40
                     zdrowie.zmianaHp(strata)
@@ -1074,6 +1070,7 @@ while graj:
             for enemy in enemyList:
                 if enemy.hp <= 0:
                     punkty.dodawaniePunktów(200)
+                    Przeciwnik.pokonanych_przeciwnikow += 1
                     enemy_do_usunięcia.append(enemy)
         
         for enemy in enemy_do_usunięcia:
@@ -1116,7 +1113,6 @@ while graj:
                     punkty.rekord = punkty.wynik
             
             Scena.obecna_scena = SCENA_ŚMIERĆ
-            scena.ustawPrzyciski()
             if muzyka:
                 pygame.mixer.music.load(mus_gameover)
                 pygame.mixer.music.play()
@@ -1129,8 +1125,9 @@ while graj:
             gracz.ustawGracza((OKNO_SZER - gracz.szer)//2, OKNO_WYS - gracz.wys - 50)
 
             Przeciwnik.stworzonych_przeciwnikow = 0
-            
+            Przeciwnik.pokonanych_przeciwnikow = 0
             cykl_pojawienia_pwr_up = 15
+            Scena.faza = FAZA0
 
             enemyList.clear()
             pociskList.clear()
@@ -1141,9 +1138,10 @@ while graj:
             czas_intro += 1
             black.set_alpha(255 * (1 - 2*abs(math.sin(czas_intro/116))))
             okienko.blit(black, (0, 0))
+    
     elif scena == SCENA_PAUZA:
         okienko.blit(bg_pauza, (0, 0))
-        scena.rysujPrzyciski()
+        scena.ustaw_i_rysujPrzyciski()
         pygame.display.update() # to ważne, nie usuwać
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.QUIT:
@@ -1163,7 +1161,7 @@ while graj:
                     pauza = False
     elif scena == SCENA_ŚMIERĆ:
         okienko.blit(bg_gameover, (0,0))
-        scena.rysujPrzyciski()
+        scena.ustaw_i_rysujPrzyciski()
 
         czas_intro = 0
 
@@ -1171,17 +1169,16 @@ while graj:
             if zdarzenie.type == pygame.QUIT:
                 pygame.mixer.stop()
             if zdarzenie.type == pygame.MOUSEBUTTONUP:
-                if WYJDŹ_PONOWNIE.czyMyszka():
+                if WYJDŹ.czyMyszka():
                     pygame.mixer.stop()
                     graj = False
-                elif MENU_PONOWNIE.czyMyszka():
+                elif MENU.czyMyszka():
                     Scena.obecna_scena = SCENA_MENU
-                    scena.ustawPrzyciski()
                     pygame.mixer.stop()
                     if muzyka:
                         pygame.mixer.music.load(mus_menu)
                         pygame.mixer.music.play(-1)
-                elif GRAJ_PONOWNIE.czyMyszka():
+                elif START.czyMyszka():
                     Scena.obecna_scena = SCENA_GRA
                     if muzyka:
                         pygame.mixer.music.stop()
