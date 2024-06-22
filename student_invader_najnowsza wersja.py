@@ -1127,7 +1127,7 @@ while graj:
                 pygame.mixer.music.load(mus_gameover)
                 pygame.mixer.music.play()
 
-            punkty.wynik = 0
+            
             zdrowie.hp = zdrowie.max_hp
             #gracz = Gracz()
             Gracz.ilość_rakiet = pakiet_rakiet
@@ -1179,7 +1179,9 @@ while graj:
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.QUIT:
                 pygame.mixer.stop()
+                punkty.wynik = 0
             if zdarzenie.type == pygame.MOUSEBUTTONUP:
+                punkty.wynik = 0
                 if WYJDŹ.czyMyszka():
                     pygame.mixer.stop()
                     graj = False
