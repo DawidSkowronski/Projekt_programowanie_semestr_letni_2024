@@ -14,7 +14,7 @@ pakiet_rakiet = 20
 # GŁÓWNE
 OKNO_SZER = 720
 OKNO_WYS = 960
-font = pygame.font.Font(None,32)
+font = pygame.font.Font(None,34)
 fps = 60
 okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
 
@@ -28,7 +28,6 @@ statek_prawo = pygame.image.load(os.path.join("images","statek_prawo.png")).conv
 
 icon = pygame.image.load(os.path.join("images","ic_statek.png")).convert_alpha()
 bariera = pygame.image.load(os.path.join("images","bariera.png")).convert_alpha()
-
 
 kosmita = pygame.image.load(os.path.join("images","kosmita.png")).convert_alpha()
 kosmita_1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png")).convert_alpha()
@@ -59,13 +58,15 @@ bonus_klucz = pygame.image.load(os.path.join("images","bonus_klucz.png")).conver
 bonus_rakieta = pygame.image.load(os.path.join("images","rakieta_bonus.png")).convert_alpha()
 bonus_przegrzanie = pygame.image.load(os.path.join("images","bonus_przegrzanie.png")).convert_alpha()
 bonus_bariera = pygame.image.load(os.path.join("images","bonus_bariera.png")).convert_alpha()
+klucz = pygame.image.load(os.path.join("images","klucz_naprawczy.png")).convert_alpha()
+rakieta_icon = pygame.transform.scale(bonus_rakieta,(100,80))
 
 but_start = pygame.image.load(os.path.join("images","START.png")).convert_alpha()
-but_start_hover = pygame.image.load(os.path.join("images","START1.png")).convert_alpha()
+but_start_hover = pygame.image.load(os.path.join("images","START_aktyw.png")).convert_alpha()
 but_wyjscie = pygame.image.load(os.path.join("images","EXIT.png")).convert_alpha()
-but_wyjscie_hover = pygame.image.load(os.path.join("images","EXIT1.png")).convert_alpha()
+but_wyjscie_hover = pygame.image.load(os.path.join("images","EXIT_aktyw.png")).convert_alpha()
 but_kontynuuj = pygame.image.load(os.path.join("images","kontynuuj.jpg")).convert_alpha()
-but_kontynuuj_hover = pygame.image.load(os.path.join("images","kontynuuj1.jpg")).convert_alpha()
+but_kontynuuj_hover = pygame.image.load(os.path.join("images","kontynuuj_aktyw.jpg")).convert_alpha()
 
 but_dzwiek_enabled = pygame.image.load(os.path.join("images","włączony.jpg")).convert_alpha()
 but_dzwiek_enabled_hover = pygame.image.load(os.path.join("images","włączony1.jpg")).convert_alpha()
@@ -350,9 +351,9 @@ class Gracz(Byt):
         
         # GRACZ NIE MOŻE WYJŚĆ ZA OKIENKO
         # NIE MOŻE WYJŚĆ Z LEWEJ ANI Z PRAWEJ
-        if self.x <= 25:
+        if self.x <= 10:
             if self.dx < 0:
-                self.x = 25
+                self.x = 10
                 self.obrazek = statek
             else:
                 self.x += self.dx
@@ -459,7 +460,8 @@ class Scoreboard:
             okienko.blit(font.render("NOWY REKORD: " + str(self.wynik),True,(0, 200, 0)),(0,20))
         else:
             okienko.blit(font.render("Rekord: " + str(self.rekord),True,(255, 255, 255)),(0,20))
-        okienko.blit(font.render("Ilość rakiet: " + str(Gracz.ilość_rakiet),True,(255,255,255)),(0,40))
+        okienko.blit(rakieta_icon, (-30,40))
+        okienko.blit(font.render("x " + str(Gracz.ilość_rakiet),True,(255,255,255)),(40,60))
     
     def resetRekordu(self):
         """Zeruje najlepszy wynik gracza"""
@@ -477,9 +479,10 @@ class PasekZdrowia:
     def rysujPasek(self):
         """Pojawia pasek zdrowia na ekranie."""
         poziom_hp = self.hp / self.max_hp
-        pygame.draw.rect(okienko, "red", (10, OKNO_WYS - 40, 300, 30))
-        pygame.draw.rect(okienko, "green", (10, OKNO_WYS - 40, 300 * poziom_hp, 30))
+        pygame.draw.rect(okienko, "red", (10, OKNO_WYS - 40, 260, 25))
+        pygame.draw.rect(okienko, "green", (10, OKNO_WYS - 40, 260 * poziom_hp, 25))
         okienko.blit(font.render("HP",True,'green'),(140,OKNO_WYS - font.get_height() - 40))
+        okienko.blit(klucz, (247,OKNO_WYS-50))
         
     def zmianaHp(self, wartosc:float):
         """Zmienia hp na zadaną wartość."""
