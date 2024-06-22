@@ -67,14 +67,16 @@ but_wyjscie = pygame.image.load(os.path.join("images","EXIT.png")).convert_alpha
 but_wyjscie_hover = pygame.image.load(os.path.join("images","EXIT_aktyw.png")).convert_alpha()
 but_kontynuuj = pygame.image.load(os.path.join("images","kontynuuj.jpg")).convert_alpha()
 but_kontynuuj_hover = pygame.image.load(os.path.join("images","kontynuuj_aktyw.jpg")).convert_alpha()
+but_powrot = pygame.image.load(os.path.join("images","powrót.jpg")).convert_alpha()
+but_powrot_hover = pygame.image.load(os.path.join("images","powrót_aktyw.jpg")).convert_alpha()
 
 but_dzwiek_enabled = pygame.image.load(os.path.join("images","włączony.jpg")).convert_alpha()
-but_dzwiek_enabled_hover = pygame.image.load(os.path.join("images","włączony1.jpg")).convert_alpha()
+but_dzwiek_enabled_hover = pygame.image.load(os.path.join("images","włączony_aktyw.jpg")).convert_alpha()
 but_dzwiek_disabled = pygame.image.load(os.path.join("images","wyłączony.jpg")).convert_alpha()
-but_dzwiek_disabled_hover = pygame.image.load(os.path.join("images","wyłączony1.jpg")).convert_alpha()
+but_dzwiek_disabled_hover = pygame.image.load(os.path.join("images","wyłączony_aktyw.jpg")).convert_alpha()
 
 but_instrukcje = pygame.image.load(os.path.join("images","instrukcja.jpg")).convert_alpha()
-but_instrukcje_hover = pygame.image.load(os.path.join("images","instrukcja1.jpg")).convert_alpha()
+but_instrukcje_hover = pygame.image.load(os.path.join("images","instrukcja_aktyw.jpg")).convert_alpha()
 
 bg_instrukcje = pygame.image.load(os.path.join("images","jak.jpg")).convert_alpha()
 bg_kosmos = pygame.image.load(os.path.join("images","kosmos.png")).convert_alpha()
@@ -798,7 +800,7 @@ WYJDŹ = Przycisk(but_wyjscie, but_wyjscie_hover)
 START = Przycisk(but_start, but_start_hover)
 EXIT = Przycisk(but_wyjscie, but_wyjscie_hover)
 INSTRUKCJA = Przycisk(but_instrukcje, but_instrukcje_hover)
-MENU = Przycisk(but_dzwiek_enabled, but_dzwiek_enabled_hover)
+MENU = Przycisk(but_powrot, but_powrot_hover)
 MUZYKA_ON = Przycisk(but_dzwiek_enabled, but_dzwiek_enabled_hover)
 MUZYKA_OFF = Przycisk(but_dzwiek_disabled, but_dzwiek_disabled_hover)
 
