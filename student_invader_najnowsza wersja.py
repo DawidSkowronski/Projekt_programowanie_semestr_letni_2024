@@ -457,13 +457,21 @@ class Scoreboard:
     
     def rysujScoreboard(self):
         """Pojawia na ekranie wynik razem z rekordem."""
-        okienko.blit(font.render("Wynik: " + str(self.wynik),True,(255,255,255)),(0,0))
-        if self.rekord < self.wynik:
-            okienko.blit(font.render("NOWY REKORD: " + str(self.wynik),True,(0, 200, 0)),(0,20))
-        else:
-            okienko.blit(font.render("Rekord: " + str(self.rekord),True,(255, 255, 255)),(0,20))
-        okienko.blit(rakieta_icon, (-30,40))
-        okienko.blit(font.render("x " + str(Gracz.ilość_rakiet),True,(255,255,255)),(40,60))
+        if scena == SCENA_GRA:
+            okienko.blit(font.render("Wynik: " + str(self.wynik),True,(255,255,255)),(0,0))
+            if self.rekord < self.wynik:
+                okienko.blit(font.render("NOWY REKORD: " + str(self.wynik),True,(0, 200, 0)),(0,20))
+            else:
+                okienko.blit(font.render("Rekord: " + str(self.rekord),True,(255, 255, 255)),(0,20))
+            okienko.blit(rakieta_icon, (-30,40))
+            okienko.blit(font.render("x " + str(Gracz.ilość_rakiet),True,(255,255,255)),(40,60))
+        elif scena == SCENA_ŚMIERĆ:
+            okienko.blit(font.render("Wynik: " + str(self.wynik),True,(255,255,255)),(280,170))
+            if self.rekord < self.wynik:
+                okienko.blit(font.render("NOWY REKORD: " + str(self.wynik),True,(0, 200, 0)),(280,193))
+            else:
+                okienko.blit(font.render("Rekord: " + str(self.rekord),True,(255, 255, 255)),(280,193))
+
     
     def resetRekordu(self):
         """Zeruje najlepszy wynik gracza"""
@@ -731,9 +739,9 @@ class Scena:
             self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
             self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
         elif self.tag == "ŚMIERĆ":
-            self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
-            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
-            self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* self.przyciski[2].obrazek.get_height() - 20)
+            self.przyciski[0].ustawPrzycisk(0, OKNO_WYS - self.przyciski[0].obrazek.get_height())
+            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//5 + self.przyciski[1].obrazek.get_height() - 50)
+            self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//5 + 2* self.przyciski[2].obrazek.get_height() - 20)
         
         for przycisk in self.przyciski:
             przycisk.rysujPrzycisk()
@@ -1164,6 +1172,7 @@ while graj:
     elif scena == SCENA_ŚMIERĆ:
         okienko.blit(bg_gameover, (0,0))
         scena.ustaw_i_rysujPrzyciski()
+        punkty.rysujScoreboard()
 
         czas_intro = 0
 
