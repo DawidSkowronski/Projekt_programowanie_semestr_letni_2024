@@ -2,6 +2,7 @@ import pygame
 import random
 import os
 import math
+import unittest
 
 pygame.init()
 
@@ -763,6 +764,24 @@ class Scena:
         if scena == SCENA_GRA:
             Scena.faza.pojawPrzeciwnika()
 
+# KLASA TESTY
+class Testy(unittest.TestCase):
+
+    def test_czy_gracz_strzelil(self):
+        
+        czy_strzal = Gracz.wystrzelPocisk(self)
+        self.assertEqual(czy_strzal,True,"Nie zanotowano wystrzału.")
+
+    def test_pocisk_kolizja(self):
+        pass
+        #self.assertTrue(self.sprawdzenie_kolizji,True, "Brak kolizji.")
+    
+    def test_usuwanie_przeciwnika(self):
+        pass
+
+if __name__ == '__main__':
+     unittest.main()
+
 ##
 ##      OBIEKTY
 ##
@@ -1213,3 +1232,4 @@ while graj:
                         pygame.mixer.music.play(-1)
 
 pygame.quit()
+
