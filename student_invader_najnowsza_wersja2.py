@@ -4,12 +4,13 @@ import os
 import math
 
 pygame.init()
+
 ##
 ##      GLOBALNE
 ##
 
-# ILOŚĆ RAKIET (DO TESTÓW)
-pakiet_rakiet = 20
+# ILOŚĆ RAKIET
+pakiet_rakiet = 15
 
 # GŁÓWNE
 OKNO_SZER = 720
@@ -21,6 +22,7 @@ okienko = pygame.display.set_mode((OKNO_SZER, OKNO_WYS), 0, 32)
 black = pygame.Surface((OKNO_SZER, OKNO_WYS))
 black.set_alpha(255)
 black.fill((0, 0, 0))
+
 # SPRAJTY
 statek = pygame.image.load(os.path.join("images","statek.png")).convert_alpha()
 statek_lewo = pygame.image.load(os.path.join("images","statek_lewo.png")).convert_alpha()
@@ -117,6 +119,7 @@ sfx_leczenie.set_volume(.5)
 sfx_tarcza_on.set_volume(.5)
 sfx_tarcza_off.set_volume(.5)
 sfx_rakieta_bonus.set_volume(.5)
+sfx_inkwizycja.set_volume(.5)
 
 # MUZYKA
 mus_gameover = os.path.join("music","game_over.mp3")
@@ -131,17 +134,21 @@ pygame.mixer.music.set_volume(.25)
 ##      KLASY
 ##
 
+# KLASA TŁA
 class Tło:
+    """Klasa tworząca ruchome tło."""
     def __init__(self, y):
         self.y = y
         self.img = bg_kosmos
 
     def ruchTła(self):
+        """Porusza tłem."""
         self.y += .33
         if self.y >= OKNO_WYS:
             self.y = -OKNO_WYS
 
     def rysujTło(self):
+        """Rysuje tło."""
         self.ruchTła()
         okienko.blit(self.img, (0, self.y))
 
@@ -159,43 +166,54 @@ class Byt:
 
 # KLASA WYBUCH
 class Wybuch:
-    """Klasa wybuch lol lmao rofl"""
+    """Klasa tworząca animacje wybuchów."""   # DO POPRAWY WYBUCHY
     def __init__(self, x, y):
         self.img0 = eksplozja
         self.img1 = eksplozja_1
         self.img2 = eksplozja_2
         self.x = x
         self.y = y
-        self.miejsce_wybuchu = (self.x + kosmita.get_width()//2 - eksplozja.get_width()//2, self.y + kosmita.get_height()//2 - eksplozja.get_height()//2)
-        self.miejsce_wybuchu1 = (self.x + pocisk_gracza1.get_width()//2 - (eksplozja.get_width()//2)*2, self.y + pocisk_gracza1.get_height()//2 - (eksplozja.get_height()//2)*2)
+        self.miejsce_wybuchu_kosmita = (self.x + kosmita.get_width()//2 - eksplozja.get_width()//2, self.y + kosmita.get_height()//2 - eksplozja.get_height()//2)
+        self.miejsce_wybuchu_krazownik = (self.x + krazownik.get_width()//2 - (eksplozja.get_width()//2)*1.3, self.y + krazownik.get_height()//2 - (eksplozja.get_height()//2)*1.3)
+        self.miejsce_wybuchu_rakieta = (self.x + pocisk_gracza1.get_width()//2 - (eksplozja.get_width()//2)*2, self.y + pocisk_gracza1.get_height()//2 - (eksplozja.get_height()//2)*2)
     
-    def CzyWybuch(self, x, y, ticks_wybuchu, T_F):
+    def CzyWybuch(self, x, y, ticks_wybuchu, czy_krazownik, czy_rakieta):
+        """Ustawia koordynaty wybuchu i sprawdza, czy jest to wybuch rakiety."""
         self.x = x
         self.y = y
         self.czas = ticks_wybuchu
-        self.rakieta = T_F
+        self.czy_krazownik = czy_krazownik
+        self.czy_rakieta = czy_rakieta
+
     
     def IleOdWybuchu(self, czas_od_wybuchu):
-        if czas_od_wybuchu - self.czas <= 225:
-            if czas_od_wybuchu - self.czas <= 150:
-                if czas_od_wybuchu - self.czas <= 75:
-                    if self.rakieta:
-                        okienko.blit(pygame.transform.smoothscale(self.img0, [self.img0.get_width()*2, self.img0.get_height()*2]), self.miejsce_wybuchu1)
-                    else:
-                        okienko.blit(self.img0, self.miejsce_wybuchu)
-                    return
-                if self.rakieta:
-                    okienko.blit(pygame.transform.smoothscale(self.img0, [self.img0.get_width()*2, self.img0.get_height()*2]), self.miejsce_wybuchu1)
-                else:
-                    okienko.blit(self.img1, self.miejsce_wybuchu)
-                return
-            if self.rakieta:
-                okienko.blit(pygame.transform.smoothscale(self.img0, [self.img0.get_width()*2, self.img0.get_height()*2]), self.miejsce_wybuchu1)
+        """Wykonuje odpowiednią animację dla danego typu wybuchu."""
+        if self.czy_rakieta:
+            if czas_od_wybuchu - self.czas <= 225:
+                okienko.blit(pygame.transform.smoothscale(self.img0, [self.img0.get_width()*2, self.img0.get_height()*2]), self.miejsce_wybuchu_rakieta)
             else:
-                okienko.blit(self.img2, self.miejsce_wybuchu)
-            return
-        
-        else: wybuchList.remove(self)
+                wybuchList.remove(self)
+        else:
+            if czas_od_wybuchu - self.czas <= 225:
+                if czas_od_wybuchu - self.czas <= 150:
+                    if czas_od_wybuchu - self.czas <= 75:
+                        if self.czy_krazownik:
+                            okienko.blit(pygame.transform.smoothscale(self.img0, [self.img0.get_width()*1.3, self.img0.get_height()*1.3]), self.miejsce_wybuchu_krazownik)
+                        else:
+                            okienko.blit(self.img0, self.miejsce_wybuchu_kosmita)
+                        return
+                    if self.czy_krazownik:
+                        okienko.blit(pygame.transform.smoothscale(self.img1, [self.img0.get_width()*1.3, self.img0.get_height()*1.3]), self.miejsce_wybuchu_krazownik)
+                    else:
+                        okienko.blit(self.img1, self.miejsce_wybuchu_kosmita)
+                    return
+                if self.czy_krazownik:
+                    okienko.blit(pygame.transform.smoothscale(self.img2, [self.img0.get_width()*1.3, self.img0.get_height()*1.3]), self.miejsce_wybuchu_krazownik)
+                else:
+                    okienko.blit(self.img2, self.miejsce_wybuchu_kosmita)
+                return
+            else:
+                wybuchList.remove(self)
 
 # KLASA PRZYCISK
 class Przycisk():
@@ -228,6 +246,7 @@ class Przycisk():
 
 # KLASA BONUSY
 class Bonusy(Byt):
+    """Klasa tworząca bonusy."""
     stworzone_bonusy = 0
 
     dx = 0
@@ -240,7 +259,6 @@ class Bonusy(Byt):
         self.speed = 2.5
         self.nietrafiony = True
         self.z_prawej_do_lewej = random.choice([True, False])
-        print(self.z_prawej_do_lewej)
         if zdrowie.hp >= zdrowie.max_hp:
             self.pwr_up = random.choice([i for i in range(1, 4) if i != Bonusy.poprzedni_pwr_up])
             Bonusy.poprzedni_pwr_up = self.pwr_up
@@ -264,17 +282,17 @@ class Bonusy(Byt):
         self.wys = self.obrazek.get_width()
 
     def rysujBonus(self):
+        """Rysuje bonus i usuwa go, jeżeli znajdzie się za granicą mapy."""
         okienko.blit(self.obraz,(self.x,self.y))
         if self.z_prawej_do_lewej and self.x <= 0 - self.obraz.get_width() - 5:
-            print("BONUS USUNIĘTY")
             bonusList.remove(self)
             del self
         elif self.x >= OKNO_SZER + self.obraz.get_width() + 5:
-            print("BONUS USUNIĘTY")
             bonusList.remove(self)
             del self
 
     def ruchBonusu(self):
+        """Określa ruch bonusu po sinusoidzie."""
         self.dx = self.speed
         if self.z_prawej_do_lewej:
             self.x -= self.dx
@@ -284,6 +302,7 @@ class Bonusy(Byt):
         self.y -= self.dy
     
     def ustawBonus(self):
+        """Ustawia bonus odpwiednio z lewej lub prawej strony i na losowej wysokości."""
         if self.z_prawej_do_lewej:
             self.x = OKNO_SZER
         else:
@@ -405,6 +424,7 @@ class Gracz(Byt):
         return False
     
     def przegrzanie(self):
+        """Nie pozwala graczowi strzelać, jeżeli 'przegrzał broń'."""
         self.poziom_przegrzania = self.aktualne_przegrzanie / self.maks_przegrzanie
         if Gracz.przegrzanie_bonus is False:
             if keys[pygame.K_SPACE]:
@@ -438,6 +458,7 @@ class Gracz(Byt):
             pygame.draw.rect(okienko, "gold", (self.x +125, self.y +7, 13, 120))
 # KLASA PUNKTY GRACZA
 class Scoreboard:
+    """Klasa tworząca wynik gracza."""
     def __init__(self):
         self.wynik = 0
         try:
@@ -451,7 +472,6 @@ class Scoreboard:
             with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
                 rekord.write(str(0))
                 self.rekord = 0
-        #print(self.rekord)
 
     def dodawaniePunktów(self,wartość):
         """Dodaje punkty do wyniku."""
@@ -476,14 +496,14 @@ class Scoreboard:
 
     
     def resetRekordu(self):
-        """Zeruje najlepszy wynik gracza"""
-        print(self.rekord)
+        """Zeruje najlepszy wynik gracza."""
         with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
             rekord.write(str(0))
             self.rekord = 0
         
 # KLASA ŻYCIE GRACZA
 class PasekZdrowia:
+    """Klasa tworząca pasek zdrowia."""
     def __init__(self, max_hp):
         self.hp = max_hp
         self.max_hp = max_hp
@@ -507,6 +527,7 @@ class PasekZdrowia:
 
 # KLASA PRZECIWNIK
 class Przeciwnik(Byt):
+    """Klasa tworząca instancje przeciwników."""
     stworzonych_przeciwnikow = 0
     pokonanych_przeciwnikow = 0
 
@@ -514,6 +535,7 @@ class Przeciwnik(Byt):
     dy = 0
 
     def __init__(self, x:float = 0, y:float = 0, typ:str = "kosmita", czas_powstania:float = 0):
+        """Przeciwnik otrzymuje ogólne zmienne oraz konkretne, zależące od jego rodzaju."""
         # ID PRZECIWNIKA
         if Przeciwnik.stworzonych_przeciwnikow > 299:
             Przeciwnik.stworzonych_przeciwnikow = 0
@@ -567,14 +589,12 @@ class Przeciwnik(Byt):
         else:
             okienko.blit(self.obraz,(self.x,self.y))
         if self.pozaOknem():
-            #print("PRZECIWNIK USUNIĘTY")
             enemy_do_usunięcia.append(self)
 
     def ruchPrzeciwnika(self):
         """Zmienia koordynaty przeciwnika."""
         if self.tag == "kamikaze":
             czas_zachowania = czas - self.czas_powstania
-            print(czas_zachowania)
             if czas_zachowania < 500:
                 self.dy = self.speed * 4*math.cos(math.radians(czas_zachowania//5.5))
             elif czas_zachowania < 800:
@@ -617,6 +637,7 @@ class Przeciwnik(Byt):
 
 # KLASA POCISK
 class Pocisk(Byt):
+    """Klasa tworząca pociski gracza i przeciwników."""
     def __init__(self, x:float, y:float, predkosc:float, kto_strzelił:str):
         if kto_strzelił == "gracz":
             obrazek = pocisk_gracza
@@ -665,6 +686,7 @@ class Pocisk(Byt):
 
 # KLASA FAZA
 class Faza:
+    """Klasa tworząca fazy gry."""
     wszystkie_fazy = 0
 
     def __init__(self, przeciwnicy:list[str], czestotliwosci:list[tuple], cykl_pojawiania:float):
@@ -676,12 +698,12 @@ class Faza:
         Faza.wszystkie_fazy += 1
 
     def pojawPrzeciwnika(self):
+        """LOL NIE WIEM"""
         for zdarzenie in zdarzenia:
             if zdarzenie.type == self.pojaw_przeciwnika:
                 rint = random.randint(1,100)
                 i = 0
                 typ_wybrany = self.przeciwnicy[0]
-                print(rint)
                 for typ in self.przeciwnicy:
                     if rint in range(self.czestotliwosci[i][0], self.czestotliwosci[i][1]):
                         typ_wybrany = typ
@@ -704,6 +726,7 @@ FAZA6 = Faza(["kosmita", "kamikaze"], [(1, 10), (11, 90)], 500)
 
 # KLASA SCENA
 class Scena:
+    """Klasa tworząca sceny gry."""
     obecna_scena = None
     faza:Faza = FAZA0
 
@@ -712,6 +735,7 @@ class Scena:
         self.przyciski = przyciski
 
     def ustawPrzyciski(self):
+        """Ustawia przyciski w zależności od sceny."""
         if self.tag == "MENU":
             self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
             self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
@@ -729,32 +753,16 @@ class Scena:
             self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* self.przyciski[2].obrazek.get_height() - 20)
 
     def rysujPrzyciski(self):
+        """Rysuje przyciski obecne w danej scenie."""
         for przycisk in self.przyciski:
             przycisk.rysujPrzycisk()
-    
-    def ustaw_i_rysujPrzyciski(self):
-        if self.tag == "MENU":
-            self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
-            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
-            self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//2 + 2* self.przyciski[2].obrazek.get_height() - 20)
-        elif self.tag == "INSTRUKCJE":
-            self.przyciski[0].ustawPrzycisk(20, OKNO_WYS - self.przyciski[0].obrazek.get_height() - 20)
-        elif self.tag == "PAUZA":
-            self.przyciski[0].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[0].obrazek.get_width()//2, OKNO_WYS//2 - self.przyciski[0].obrazek.get_height() - 50)
-            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//2 + self.przyciski[1].obrazek.get_height() - 50)
-        elif self.tag == "ŚMIERĆ":
-            self.przyciski[0].ustawPrzycisk(0, OKNO_WYS - self.przyciski[0].obrazek.get_height())
-            self.przyciski[1].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[1].obrazek.get_width()//2, OKNO_WYS//5 + self.przyciski[1].obrazek.get_height() - 50)
-            self.przyciski[2].ustawPrzycisk(OKNO_SZER//2 - self.przyciski[2].obrazek.get_width()//2, OKNO_WYS//5 + 2* self.przyciski[2].obrazek.get_height() - 20)
-        
-        for przycisk in self.przyciski:
-            przycisk.rysujPrzycisk()
-
 
     @staticmethod
     def fazaGry():
+        """Tworzy przeciwników, jeżeli obecna scena to gra."""
         if scena == SCENA_GRA:
             Scena.faza.pojawPrzeciwnika()
+
 ##
 ##      OBIEKTY
 ##
@@ -887,7 +895,6 @@ while graj:
                 czas_intro = 0
                 puszczono = True
         black.set_alpha(255 * (1 - abs(math.sin(czas_intro/117))))
-        print(black.get_alpha())
         okienko.blit(black, (0, 0))
     elif scena == SCENA_MENU:
         TŁO1.rysujTło()
@@ -966,13 +973,6 @@ while graj:
                     scena.ustawPrzyciski()
                     if muzyka:
                         pygame.mixer.music.set_volume(.03)
-                elif zdarzenie.key == pygame.K_c:
-                    print(pygame.time.get_ticks())
-
-
-            # if zdarzenie.type == strzał_wróg1:
-            #     if enemyList != []:
-            #         random.choice(enemyList).wystrzelPocisk1()
 
         # WYKONUJE SIĘ NA KAŻDY TICK
         TŁO1.rysujTło()
@@ -981,7 +981,6 @@ while graj:
         czas_od_rakiety += dt
         czas_ruch_bonusu += dt/20
         czas_płynny_ruch_przeciwnika += dt/17
-        #print(czas_płynny_ruch_przeciwnika)
 
         if gracz.wystrzelPocisk():
             czas_od_pocisku = 0
@@ -1002,12 +1001,10 @@ while graj:
                 enemy.wystrzelPocisk()
             if kolizja(enemy, gracz):
                 enemy_do_usunięcia.append(enemy)
-                if Gracz.niezniszczalność_bonus is False:
-                    punkty.dodawaniePunktów(-100)
-                    zdrowie.zmianaHp(-20)
+                punkty.dodawaniePunktów(-100)
+                zdrowie.zmianaHp(-20)
             if kolizja(enemy, gracz.bariera):
                 enemy_do_usunięcia.append(enemy)
-                sfx_leczenie.play()
             enemy.ruchPrzeciwnika()
             enemy.rysujPrzeciwnika()
         
@@ -1018,7 +1015,7 @@ while graj:
             bonus = Bonusy()
             bonus.ustawBonus()
             bonusList.append(bonus)
-            cykl_pojawienia_pwr_up += 5 #random.randint(17, 27)
+            cykl_pojawienia_pwr_up += random.randint(10, 15)
 
         for bonus in bonusList:
             bonus.ruchBonusu()
@@ -1039,12 +1036,12 @@ while graj:
                         if pocisk.kto_strzelił == "rakieta":
                             czy_rakieta_wybucha = True
                             wybuch = Wybuch(pocisk.x, pocisk.y)
-                            wybuch.CzyWybuch(pocisk.x, pocisk.y, czas, True)
+                            wybuch.CzyWybuch(pocisk.x, pocisk.y, czas, False, True)
                             wybuchList.append(wybuch)
                             (x0, y0) = (pocisk.x + pocisk_gracza1.get_width()//2, pocisk.y + pocisk_gracza1.get_height()//2)
                             sfx_eksplozja_rakiety.play()
             if pocisk.kto_strzelił in ("kosmita", "krążownik", "kamikaze", "szturmowiec"):
-                if pocisk.czyKolizja(gracz) and Gracz.niezniszczalność_bonus is False:
+                if pocisk.czyKolizja(gracz):
                     pociski_do_usunięcia.append(pocisk)
                     punkty.dodawaniePunktów(-100)
                     if pocisk.kto_strzelił == "kosmita":
@@ -1053,21 +1050,15 @@ while graj:
                         strata = -10
                     else:
                         strata = -40
-                    
-                    #strata = -20 if pocisk.kto_strzelił == ("kosmita" or "szturmowiec") elif -40
                     zdrowie.zmianaHp(strata)
                 if pocisk.czyKolizja(gracz.bariera):
                     pociski_do_usunięcia.append(pocisk)
                     sfx_leczenie.play()
-                    #^^^^^^^^^^^^^^^^^^
-                    #tutaj zrobimy stratę hp zależną od typu przeciwnika (to jak zrobimy klasę typów przeciwnika albo wczytywanie pliku)
-                #if kolizja(pocisk,bariera):
-                #    pociski_do_usunięcia.append(pocisk)
             if pocisk.pozaOknem() and pocisk not in pociski_do_usunięcia:
                 pociski_do_usunięcia.append(pocisk)
 
             for bonus in bonusList:
-                if pocisk.czyKolizja(bonus) and (pocisk.kto_strzelił == "gracz" or pocisk.kto_strzelił == "rakieta") and bonus.nietrafiony:
+                if pocisk.czyKolizja(bonus) and pocisk.kto_strzelił in ("gracz", "rakieta") and bonus.nietrafiony:
                     if bonus.pwr_up == 1: #ODPORNOŚĆ
                         Gracz.niezniszczalność_bonus = True
                         czas_niezniszczalności_bonus = czas
@@ -1086,18 +1077,13 @@ while graj:
                     bonus.nietrafiony = False
                     bonusy_do_usunięcia.append(bonus)
         
-        for bonus in bonusy_do_usunięcia:
-            try:
-                bonusList.remove(bonus)
-            except:
-                print("BŁĄD USUNIĘCIA BONUSU")
-        
         if czy_rakieta_wybucha:
             for enemy in enemyList:
                 if ((enemy.x + enemy.obraz.get_width()//2) - x0)**2 + ((enemy.y + enemy.obraz.get_height()//2) - y0)**2 <= (eksplozja.get_height())**2:
                     enemy.hp += -14
                 if enemy.hp <= 0:
                     punkty.dodawaniePunktów(200)
+                    Przeciwnik.pokonanych_przeciwnikow += 1
                     enemy_do_usunięcia.append(enemy)
         else:
             for enemy in enemyList:
@@ -1108,18 +1094,28 @@ while graj:
         
         for enemy in enemy_do_usunięcia:
             wybuch = Wybuch(enemy.x, enemy.y)
-            wybuch.CzyWybuch(enemy.x, enemy.y, czas, False)
+            if enemy.tag == "krążownik":
+                wybuch.CzyWybuch(enemy.x, enemy.y, czas, True, False)
+            else:
+                wybuch.CzyWybuch(enemy.x, enemy.y, czas, False, False)
             wybuchList.append(wybuch)
             sfx_eksplozja.play()
             try:
                 enemyList.remove(enemy)
             except:
                 print("Błąd usunięcia przeciwnika.")
+        
         for pocisk in pociski_do_usunięcia:
             try:
                 pociskList.remove(pocisk)
             except:
                 print("Błąd usunięcia pocisku.")
+        
+        for bonus in bonusy_do_usunięcia:
+            try:
+                bonusList.remove(bonus)
+            except:
+                print("Błąd usunięcia bonusu.")
         
         gracz.przesuńGracza()
         gracz.rysujGracza()
@@ -1162,8 +1158,6 @@ while graj:
         scena.rysujPrzyciski()
         pygame.display.update() # to ważne, nie usuwać
         for zdarzenie in zdarzenia:
-            if zdarzenie.type == pygame.QUIT:
-                graj = False
             if zdarzenie.type == pygame.KEYDOWN:
                 if zdarzenie.key == pygame.K_ESCAPE:
                     if muzyka:
@@ -1175,8 +1169,11 @@ while graj:
                         pygame.mixer.music.set_volume(.25)
                     scena = SCENA_GRA
                 elif MENU.czyMyszka():
+                    if muzyka:
+                        pygame.mixer.music.set_volume(.25)
                     scena = SCENA_MENU
                     scena.ustawPrzyciski()
+                    czas_intro = 0
                     if muzyka:
                         pygame.mixer.music.load(mus_menu)
                         pygame.mixer.music.play()
@@ -1184,10 +1181,8 @@ while graj:
                     punkty.wynik = 0
                 elif WYJDŹ.czyMyszka():
                     graj = False
-                    pauza = False
                 elif INKWIZYCJA.czyMyszka():
                     sfx_inkwizycja.play()
-
     elif scena == SCENA_ŚMIERĆ:
         okienko.blit(bg_gameover, (0,0))
         scena.rysujPrzyciski()
@@ -1198,7 +1193,6 @@ while graj:
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.MOUSEBUTTONUP:
                 if WYJDŹ.czyMyszka():
-                    pygame.mixer.stop()
                     graj = False
                 elif MENU.czyMyszka():
                     punkty.wynik = 0
@@ -1210,6 +1204,7 @@ while graj:
                         pygame.mixer.music.play(-1)
                 elif START.czyMyszka():
                     punkty.wynik = 0
+                    czas_intro = 0
                     scena = SCENA_GRA
                     scena.ustawPrzyciski()
                     if muzyka:
