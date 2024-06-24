@@ -130,8 +130,7 @@ mus_menu = os.path.join("music","menu.mp3")
 mus_goodman = os.path.join("music","saul_goodman.mp3")
 mus_gra_0 = os.path.join("music","projekt_riff1.wav")
 mus_gra_1 = os.path.join("music","projekt_riff_intro.wav")
-mus_gra_2 = os.path.join("music","projekt_riff2.wav")
-szafa_grająca = [mus_gra_0,mus_gra_1,mus_gra_2]
+szafa_grająca = [mus_gra_0,mus_gra_1]
 
 pygame.mixer.music.load(mus_goodman)
 pygame.mixer.music.set_volume(.45)
