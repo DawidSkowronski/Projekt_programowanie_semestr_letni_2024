@@ -867,6 +867,9 @@ czas_goodman = 0
 czas_niezniszczalności_bonus = 0
 czas_przegrzanie_bonus = 0
 czas = 0
+enemy_do_usunięcia = []
+bonusy_do_usunięcia = []
+pociski_do_usunięcia = []
 
 easter_egg = random.choice([True, False])
 
@@ -1020,6 +1023,7 @@ while graj:
                 scena = SCENA_MENU
                 scena.ustawPrzyciski()
     elif scena == SCENA_GRA:
+        # FAZY
         Scena.fazaGry()
         if punkty.wynik < 30000:
             if punkty.wynik in (5000, 5500):
@@ -1036,6 +1040,8 @@ while graj:
             if punkty.wynik % 10000 in range(0, 399):
                 random_faza = random.choice([FAZA4, FAZA5, FAZA6, FAZA7])
                 Scena.faza = random_faza
+
+        # PAUZA
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.KEYDOWN:
                 if zdarzenie.key == pygame.K_ESCAPE:
@@ -1044,13 +1050,16 @@ while graj:
                     if muzyka:
                         pygame.mixer.music.set_volume(.08)
 
-        # WYKONUJE SIĘ NA KAŻDY TICK
+        # gameplay
         TŁO1.rysujTło()
         TŁO2.rysujTło()
         czas_od_pocisku += dt
         czas_od_rakiety += dt
         czas_ruch_bonusu += dt/20
         czas_płynny_ruch_przeciwnika += dt/17
+        pociski_do_usunięcia.clear()
+        bonusy_do_usunięcia.clear()
+        enemy_do_usunięcia.clear()
 
         if gracz.wystrzelPocisk():
             czas_od_pocisku = 0
@@ -1064,7 +1073,6 @@ while graj:
         if czas_od_rakiety > 5000:
             czas_od_rakiety = Gracz.cooldown_rakiety
         
-        enemy_do_usunięcia = []
         strzelający_przeciwnik = random.randint(0, 250)
         for enemy in enemyList:
             if enemy.id == strzelający_przeciwnik:
@@ -1091,9 +1099,6 @@ while graj:
             bonus.ruchBonusu()
             bonus.rysujBonus()
         
-        bonusy_do_usunięcia = []
-        
-        pociski_do_usunięcia = []
         for pocisk in pociskList:
             pocisk.ruchPocisku()
             pocisk.rysujPocisk()
