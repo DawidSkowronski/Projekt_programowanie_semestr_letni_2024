@@ -874,7 +874,7 @@ pociski_do_usunięcia = []
 easter_egg = random.choice([True, False])
 
 # funkcja sprawdzająca kolizję obiektów
-def kolizja(obiekt1, obiekt2):
+def kolizja(obiekt1: Byt, obiekt2: Byt):
     """Sprawdza kolizję między dwoma obiektami, zwraca prawdę lub fałsz."""
     ramka_x = obiekt2.x - obiekt1.x
     ramka_y = obiekt2.y - obiekt1.y
@@ -882,6 +882,8 @@ def kolizja(obiekt1, obiekt2):
 
 # funkcja restartująca wszystkie assety przed ponownym rozpoczęciem gry
 def restart():
+    global cykl_pojawienia_pwr_up
+
     zdrowie.hp = zdrowie.max_hp
     Gracz.ilość_rakiet = pakiet_rakiet
     gracz.aktualne_przegrzanie = gracz.maks_przegrzanie
@@ -889,6 +891,7 @@ def restart():
 
     Przeciwnik.stworzonych_przeciwnikow = 0
     Przeciwnik.pokonanych_przeciwnikow = 0
+
     cykl_pojawienia_pwr_up = 2
     Scena.faza = FAZA0
     
