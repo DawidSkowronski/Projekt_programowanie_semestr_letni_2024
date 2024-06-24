@@ -128,9 +128,13 @@ mus_gameover = os.path.join("music","game_over.mp3")
 mus_gra = os.path.join("music","muza.mp3")
 mus_menu = os.path.join("music","menu.mp3")
 mus_goodman = os.path.join("music","saul_goodman.mp3")
+mus_gra_0 = os.path.join("music","projekt_riff1.wav")
+mus_gra_1 = os.path.join("music","projekt_riff_intro.wav")
+mus_gra_2 = os.path.join("music","projekt_riff2.wav")
+szafa_grająca = [mus_gra_0,mus_gra_1,mus_gra_2]
 
 pygame.mixer.music.load(mus_goodman)
-pygame.mixer.music.set_volume(.25)
+pygame.mixer.music.set_volume(.45)
 
 ##
 ##      KLASY
@@ -1010,7 +1014,7 @@ while graj:
                 if START.czyMyszka():
                     pygame.mixer.music.stop()
                     if muzyka:
-                        pygame.mixer.music.load(mus_gra)
+                        pygame.mixer.music.load(random.choice(szafa_grająca))
                         pygame.mixer.music.play(-1)
                     czas_intro = 0
                     scena = SCENA_GRA
@@ -1295,7 +1299,7 @@ while graj:
                     scena.ustawPrzyciski()
                     if muzyka:
                         pygame.mixer.music.stop()
-                        pygame.mixer.music.load(mus_gra)
+                        pygame.mixer.music.load(random.choice(szafa_grająca))
                         pygame.mixer.music.play(-1)
 
 testy = Testy()
