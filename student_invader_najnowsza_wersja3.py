@@ -84,7 +84,7 @@ but_instrukcje_hover = pygame.image.load(os.path.join("images","instrukcja_aktyw
 
 but_inkwizycja = pygame.image.load(os.path.join("images","hiszpańska_inkwizycja.png")).convert_alpha()
 
-bg_instrukcje = pygame.image.load(os.path.join("images","jak.jpg")).convert_alpha()
+bg_instrukcje = pygame.image.load(os.path.join("images","instrukcje.png")).convert_alpha()
 bg_kosmos = pygame.image.load(os.path.join("images","kosmos.png")).convert_alpha()
 bg_gameover = pygame.image.load(os.path.join("images","game_over.png")).convert_alpha()
 bg_pauza = pygame.image.load(os.path.join("images","pauza.png")).convert_alpha()
@@ -128,8 +128,8 @@ mus_gameover = os.path.join("music","game_over.mp3")
 mus_gra = os.path.join("music","muza.mp3")
 mus_menu = os.path.join("music","menu.mp3")
 mus_goodman = os.path.join("music","saul_goodman.mp3")
-mus_gra_0 = os.path.join("music","projekt_riff1.wav")
-mus_gra_1 = os.path.join("music","projekt_riff_intro.wav")
+mus_gra_0 = os.path.join("music","projekt_riff1.mp3")
+mus_gra_1 = os.path.join("music","projekt_riff_intro.mp3")
 szafa_grająca = [mus_gra_0,mus_gra_1]
 
 pygame.mixer.music.load(mus_goodman)
@@ -1034,6 +1034,7 @@ while graj:
         TŁO1.rysujTło()
         TŁO2.rysujTło()
         scena.rysujPrzyciski()
+        okienko.blit(bg_instrukcje, (0,0))
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.MOUSEBUTTONUP and INSTRUKCJA.czyMyszka():
                 scena = SCENA_MENU
