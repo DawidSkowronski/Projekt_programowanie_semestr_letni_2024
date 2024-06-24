@@ -78,7 +78,7 @@ but_instrukcje = pygame.image.load(os.path.join("images","instrukcja.jpg")).conv
 but_instrukcje_hover = pygame.image.load(os.path.join("images","instrukcja_aktyw.jpg")).convert_alpha()
 but_inkwizycja = pygame.image.load(os.path.join("images","hiszpańska_inkwizycja.png")).convert_alpha()
 
-bg_instrukcje = pygame.image.load(os.path.join("images","instrukcje.png")).convert_alpha()
+bg_instrukcje = pygame.image.load(os.path.join("images","instrukcje1.png")).convert_alpha()
 bg_kosmos = pygame.image.load(os.path.join("images","kosmos.png")).convert_alpha()
 bg_gameover = pygame.image.load(os.path.join("images","game_over.png")).convert_alpha()
 bg_pauza = pygame.image.load(os.path.join("images","pauza.png")).convert_alpha()
@@ -90,8 +90,8 @@ logo = pygame.image.load(os.path.join("images","logo.png")).convert_alpha()
 pygame.mixer.init()
 
 # SFX
-sfx_pocisk = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
-sfx_pocisk_wroga = pygame.mixer.Sound(os.path.join("sounds","plasma.mp3"))
+sfx_pocisk = pygame.mixer.Sound(os.path.join("sounds","karabin_sound.mp3"))
+sfx_kosmita = pygame.mixer.Sound(os.path.join("sounds","laser.mp3"))
 sfx_eksplozja = pygame.mixer.Sound(os.path.join("sounds", "eksplozja.ogg"))
 sfx_rakieta = pygame.mixer.Sound(os.path.join("sounds", "tsss.mp3"))
 sfx_eksplozja_rakiety = pygame.mixer.Sound(os.path.join("sounds", "eksplozja_rakieta.mp3"))
@@ -102,8 +102,11 @@ sfx_tarcza_on = pygame.mixer.Sound(os.path.join("sounds","tarcza_on.wav"))
 sfx_tarcza_off = pygame.mixer.Sound(os.path.join("sounds","tarcza_off.wav"))
 sfx_rakieta_bonus = pygame.mixer.Sound(os.path.join("sounds","rakieta_bonus.wav"))
 sfx_inkwizycja = pygame.mixer.Sound(os.path.join("sounds","hiszpańska_inkwizycja.mp3"))
+sfx_krazownik = pygame.mixer.Sound(os.path.join("sounds","laser_krazownik.mp3"))
+sfx_szturmowiec = pygame.mixer.Sound(os.path.join("sounds","laser_szturmowiec.mp3"))
 
-sfx_pocisk.set_volume(.05)
+
+sfx_pocisk.set_volume(.15)
 sfx_eksplozja.set_volume(.35)
 sfx_rakieta.set_volume(.15)  # zmienić
 sfx_eksplozja_rakiety.set_volume(.1)
@@ -114,6 +117,9 @@ sfx_tarcza_on.set_volume(.5)
 sfx_tarcza_off.set_volume(.5)
 sfx_rakieta_bonus.set_volume(.5)
 sfx_inkwizycja.set_volume(.5)
+sfx_kosmita.set_volume(.3)
+sfx_szturmowiec.set_volume(.3)
+sfx_krazownik.set_volume(.3)
 
 # MUZYKA
 mus_gameover = os.path.join("music","game_over.mp3")
@@ -125,7 +131,7 @@ mus_gra_1 = os.path.join("music","projekt_riff_intro.mp3")
 szafa_grająca = [mus_gra_0,mus_gra_1]
 
 pygame.mixer.music.load(mus_goodman)
-pygame.mixer.music.set_volume(.45)
+pygame.mixer.music.set_volume(.35)
 
 ##
 ##      KLASY
@@ -617,11 +623,17 @@ class Przeciwnik(Byt):
         """Pozwala przeciwnikowi wystrzelić pocisk"""
         if self.tag == "kamikaze":
             return False
-        if self.tag == "szturmowiec":
+        elif self.tag == "kosmita":
+            sfx_kosmita.play()
+            pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, self.pocisk_speed, self.tag))
+
+        elif self.tag == "szturmowiec":
+            sfx_szturmowiec.play()
             pociskList.append(Pocisk(self.x + self.szer//2 - 30, self.y + self.wys//2, self.pocisk_speed, self.tag))
             pociskList.append(Pocisk(self.x + self.szer//2 + 30, self.y + self.wys//2, self.pocisk_speed, self.tag))
             return True
         else:
+            sfx_krazownik.play()
             pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, self.pocisk_speed, self.tag))
             return True
     
