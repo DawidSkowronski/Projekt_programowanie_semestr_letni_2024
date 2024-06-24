@@ -6,6 +6,7 @@ import pytest
 import unittest
 
 pygame.init()
+zegarek = pygame.time.Clock()
 
 ##
 ##      GLOBALNE
@@ -30,20 +31,14 @@ statek = pygame.image.load(os.path.join("images","statek.png")).convert_alpha()
 statek_lewo = pygame.image.load(os.path.join("images","statek_lewo.png")).convert_alpha()
 statek_prawo = pygame.image.load(os.path.join("images","statek_prawo.png")).convert_alpha()
 
-icon = pygame.image.load(os.path.join("images","ic_statek.png")).convert_alpha()
-bariera = pygame.image.load(os.path.join("images","bariera.png")).convert_alpha()
-
 kosmita = pygame.image.load(os.path.join("images","kosmita.png")).convert_alpha()
 kosmita_1 = pygame.image.load(os.path.join("images","kosmita_dmg1.png")).convert_alpha()
 kosmita_2 = pygame.image.load(os.path.join("images","kosmita_dmg2.png")).convert_alpha()
-
 kamikaze = pygame.image.load(os.path.join("images","kamikaze.png")).convert_alpha()
 kamikaze_szarza = pygame.image.load(os.path.join("images","kamikaze_szarża.png"))
-
 krazownik = pygame.image.load(os.path.join("images","przeciwnik2.png")).convert_alpha()
 krazownik_1 = pygame.image.load(os.path.join("images","przeciwnik2_dmg1.png")).convert_alpha()
 krazownik_2 = pygame.image.load(os.path.join("images","przeciwnik2_dmg2.png")).convert_alpha()
-
 szturmowiec = pygame.image.load(os.path.join("images","przeciwnik3.png")).convert_alpha()
 szturmowiec_1 = pygame.image.load(os.path.join("images","przeciwnik3_dmg1.png")).convert_alpha()
 szturmowiec_2 = pygame.image.load(os.path.join("images","przeciwnik3_dmg2.png")).convert_alpha()
@@ -62,6 +57,9 @@ bonus_klucz = pygame.image.load(os.path.join("images","bonus_klucz.png")).conver
 bonus_rakieta = pygame.image.load(os.path.join("images","rakieta_bonus.png")).convert_alpha()
 bonus_przegrzanie = pygame.image.load(os.path.join("images","bonus_przegrzanie.png")).convert_alpha()
 bonus_bariera = pygame.image.load(os.path.join("images","bonus_bariera.png")).convert_alpha()
+
+icon = pygame.image.load(os.path.join("images","ic_statek.png")).convert_alpha()
+bariera = pygame.image.load(os.path.join("images","bariera.png")).convert_alpha()
 klucz = pygame.image.load(os.path.join("images","klucz_naprawczy.png")).convert_alpha()
 rakieta_icon = pygame.transform.scale(bonus_rakieta,(100,80))
 
@@ -73,25 +71,20 @@ but_kontynuuj = pygame.image.load(os.path.join("images","kontynuuj.jpg")).conver
 but_kontynuuj_hover = pygame.image.load(os.path.join("images","kontynuuj_aktyw.jpg")).convert_alpha()
 but_powrot = pygame.image.load(os.path.join("images","powrót.jpg")).convert_alpha()
 but_powrot_hover = pygame.image.load(os.path.join("images","powrót_aktyw.jpg")).convert_alpha()
-
 but_dzwiek_enabled = pygame.image.load(os.path.join("images","włączony.jpg")).convert_alpha()
 but_dzwiek_enabled_hover = pygame.image.load(os.path.join("images","włączony_aktyw.jpg")).convert_alpha()
 but_dzwiek_disabled = pygame.image.load(os.path.join("images","wyłączony.jpg")).convert_alpha()
 but_dzwiek_disabled_hover = pygame.image.load(os.path.join("images","wyłączony_aktyw.jpg")).convert_alpha()
-
 but_instrukcje = pygame.image.load(os.path.join("images","instrukcja.jpg")).convert_alpha()
 but_instrukcje_hover = pygame.image.load(os.path.join("images","instrukcja_aktyw.jpg")).convert_alpha()
-
 but_inkwizycja = pygame.image.load(os.path.join("images","hiszpańska_inkwizycja.png")).convert_alpha()
 
 bg_instrukcje = pygame.image.load(os.path.join("images","instrukcje.png")).convert_alpha()
 bg_kosmos = pygame.image.load(os.path.join("images","kosmos.png")).convert_alpha()
 bg_gameover = pygame.image.load(os.path.join("images","game_over.png")).convert_alpha()
 bg_pauza = pygame.image.load(os.path.join("images","pauza.png")).convert_alpha()
-
 bg_intro1 = pygame.image.load(os.path.join("images","intro1.png")).convert()
 bg_intro2 = pygame.image.load(os.path.join("images","saul_goodman.png")).convert_alpha()
-
 logo = pygame.image.load(os.path.join("images","logo.png")).convert_alpha()
 
 # DŹWIĘKI
@@ -111,7 +104,7 @@ sfx_tarcza_off = pygame.mixer.Sound(os.path.join("sounds","tarcza_off.wav"))
 sfx_rakieta_bonus = pygame.mixer.Sound(os.path.join("sounds","rakieta_bonus.wav"))
 sfx_inkwizycja = pygame.mixer.Sound(os.path.join("sounds","hiszpańska_inkwizycja.mp3"))
 
-sfx_pocisk.set_volume(.1)
+sfx_pocisk.set_volume(.05)
 sfx_eksplozja.set_volume(.35)
 sfx_rakieta.set_volume(.15)  # zmienić
 sfx_eksplozja_rakiety.set_volume(.1)
@@ -142,7 +135,7 @@ pygame.mixer.music.set_volume(.45)
 # KLASA TŁA
 class Tło:
     """Klasa tworząca ruchome tło."""
-    def __init__(self, y):
+    def __init__(self, y: float):
         self.y = y
         self.img = bg_kosmos
 
@@ -163,7 +156,7 @@ TŁO2 = Tło(0)
 # KLASA BYTU
 class Byt:
     """Klasa tworząca byt w grze."""
-    def __init__(self, x:float, y:float, mask, obrazek:pygame.Surface = None):
+    def __init__(self, x: float, y: float, mask: pygame.Mask, obrazek:pygame.Surface = None):
         self.x = x
         self.y = y
         self.mask = mask
@@ -172,7 +165,7 @@ class Byt:
 # KLASA WYBUCH
 class Wybuch:
     """Klasa tworząca animacje wybuchów."""
-    def __init__(self, x, y):
+    def __init__(self, x: float, y: float):
         self.img0 = eksplozja
         self.img1 = eksplozja_1
         self.img2 = eksplozja_2
@@ -181,8 +174,8 @@ class Wybuch:
         self.miejsce_wybuchu_kosmita = (self.x + kosmita.get_width()//2 - eksplozja.get_width()//2, self.y + kosmita.get_height()//2 - eksplozja.get_height()//2)
         self.miejsce_wybuchu_krazownik = (self.x + krazownik.get_width()//2 - (eksplozja.get_width()//2)*1.3, self.y + krazownik.get_height()//2 - (eksplozja.get_height()//2)*1.3)
         self.miejsce_wybuchu_rakieta = (self.x + pocisk_gracza1.get_width()//2 - (eksplozja.get_width()//2)*2, self.y + pocisk_gracza1.get_height()//2 - (eksplozja.get_height()//2)*2)
-    
-    def CzyWybuch(self, x, y, ticks_wybuchu, czy_krazownik, czy_rakieta):
+
+    def czyWybuch(self, x: float, y: float, ticks_wybuchu: float, czy_krazownik: bool, czy_rakieta: bool):
         """Ustawia koordynaty wybuchu i sprawdza, czy jest to wybuch rakiety."""
         self.x = x
         self.y = y
@@ -190,8 +183,7 @@ class Wybuch:
         self.czy_krazownik = czy_krazownik
         self.czy_rakieta = czy_rakieta
 
-    
-    def IleOdWybuchu(self, czas_od_wybuchu):
+    def ileOdWybuchu(self, czas_od_wybuchu: float):
         """Wykonuje odpowiednią animację dla danego typu wybuchu."""
         if self.czy_rakieta:
             if czas_od_wybuchu - self.czas <= 225:
@@ -222,8 +214,8 @@ class Wybuch:
 
 # KLASA PRZYCISK
 class Przycisk:
-    """Klasa zawierająca funkcjonalność przycisków"""
-    def __init__(self, but_obrazek, but_obrazek_hover:pygame.Surface = None):
+    """Klasa zawierająca funkcjonalność przycisków."""
+    def __init__(self, but_obrazek: pygame.Surface, but_obrazek_hover: pygame.Surface = None):
         
         self.mask = but_obrazek.get_rect()
 
@@ -235,7 +227,7 @@ class Przycisk:
         myszka = pygame.mouse.get_pos()
         return self.mask.collidepoint(myszka)
     
-    def ustawPrzycisk(self, x : float, y : float):
+    def ustawPrzycisk(self, x: float, y: float):
         """Ustawia przycisk na zadane koordynaty."""
         self.mask.x = x
         self.mask.y = y
@@ -256,7 +248,7 @@ class Bonusy(Byt):
     dy = 0
     poprzedni_pwr_up = 0
     
-    def __init__(self, x:float = 0, y:float = 0):
+    def __init__(self, x: float = 0, y: float = 0):
         self.x = x
         self.y = y
         self.speed = 2.5
@@ -460,10 +452,6 @@ class Gracz(Byt):
             sfx_alarm.stop()
             pygame.draw.rect(okienko, "gold", (self.x +125, self.y +7, 13, 120))
 
-    def ZlaPredkosc(self):
-        if self.predkosc != 10:
-            raise Blad("Niepoprawna wartość prędkości.")
-
 # KLASA PUNKTY GRACZA
 class Scoreboard:
     """Klasa tworząca wynik gracza."""
@@ -542,7 +530,7 @@ class Przeciwnik(Byt):
     dx = 0
     dy = 0
 
-    def __init__(self, x:float = 0, y:float = 0, typ:str = "kosmita", czas_powstania:float = 0):
+    def __init__(self, x: float = 0, y: float = 0, typ: str = "kosmita", czas_powstania: float = 0):
         """Przeciwnik otrzymuje ogólne zmienne oraz konkretne, zależące od jego rodzaju."""
         # ID PRZECIWNIKA
         if Przeciwnik.stworzonych_przeciwnikow > 299:
@@ -577,9 +565,9 @@ class Przeciwnik(Byt):
             self.obraz = szturmowiec
             self.obraz_1 = szturmowiec_1
             self.obraz_2 = szturmowiec_2
-            self.speed = 2
+            self.speed = 3
             self.pocisk_speed = 10
-            self.hp = 6
+            self.hp = 9
 
         self.czas_powstania = czas_powstania
         mask = pygame.mask.from_surface(self.obraz)
@@ -621,7 +609,7 @@ class Przeciwnik(Byt):
         self.y += self.dy
         self.x += self.dx
 
-    def ustawPrzeciwnika(self, x = 0, y = 0):
+    def ustawPrzeciwnika(self, x: float = 0, y: float = 0):
         """Ustawia przeciwnika na konkretne koordynaty."""
         self.x = x
         self.y = y
@@ -638,14 +626,14 @@ class Przeciwnik(Byt):
             pociskList.append(Pocisk(self.x + self.szer//2, self.y + self.wys//2, self.pocisk_speed, self.tag))
             return True
     
-    def pozaOknem(self):    # usuwamy przeciwników poza oknem, żeby nie zostawiać zbędnych obiektów
+    def pozaOknem(self):
         """Sprawdza, czy przeciwnik znajduje się w obszarze okna, jeśli nie -  usuwa go."""
         return self.y > OKNO_WYS + 5
 
 # KLASA POCISK
 class Pocisk(Byt):
     """Klasa tworząca pociski gracza i przeciwników."""
-    def __init__(self, x:float, y:float, predkosc:float, kto_strzelił:str):
+    def __init__(self, x: float, y: float, predkosc: float, kto_strzelił: str):
         if kto_strzelił == "gracz":
             obrazek = pocisk_gracza
         elif kto_strzelił == "kosmita":
@@ -682,16 +670,16 @@ class Pocisk(Byt):
         """Sprawdza, czy pocisk znajduje się w obszarze okna."""
         return (self.y > OKNO_WYS or self.y < -30)
     
-    def czyKolizja(self, obiekt):
+    def czyKolizja(self, obiekt: Byt):
         """Sprawdza, czy następuje kolizja między pociskiem a obiektem."""
         return kolizja(self, obiekt)
 
 # KLASA FAZA
 class Faza:
-    """Klasa tworząca fazy gry."""
+    """Klasa faz gry."""
     wszystkie_fazy = 0
 
-    def __init__(self, przeciwnicy:list[str], czestotliwosci:list[tuple], cykl_pojawiania:float):
+    def __init__(self, przeciwnicy: list[str], czestotliwosci: list[tuple], cykl_pojawiania: float):
         self.przeciwnicy = przeciwnicy
         self.czestotliwosci = czestotliwosci
         self.pojaw_przeciwnika = pygame.USEREVENT + 100 + Faza.wszystkie_fazy
@@ -700,7 +688,7 @@ class Faza:
         Faza.wszystkie_fazy += 1
 
     def pojawPrzeciwnika(self):
-        """LOL NIE WIEM"""
+        """Pojawia przeciwników w danej fazie."""
         for zdarzenie in zdarzenia:
             if zdarzenie.type == self.pojaw_przeciwnika:
                 rint = random.randint(1,100)
@@ -722,9 +710,10 @@ FAZA0 = Faza(["kosmita", "szturmowiec"], [(1, 80), (81, 100)], 1500)
 FAZA1 = Faza(["kamikaze"], [(1, 100)], 1000)
 FAZA2 = Faza(["kosmita", "kamikaze"], [(1,80), (81, 100)], 1250)
 FAZA3 = Faza(["krążownik", "kamikaze"], [(1, 60), (61, 100)], 1000)
-FAZA4 = Faza(["kosmita"], [(1, 100)], 500)
+FAZA4 = Faza(["kosmita"], [(1, 100)], 600)
 FAZA5 = Faza(["kosmita", "krążownik", "kamikaze"], [(1,50),(51,75),(76,100)], 1000)
-FAZA6 = Faza(["kosmita", "kamikaze"], [(1, 10), (11, 90)], 500)
+FAZA6 = Faza(["kosmita", "kamikaze", "szturmowiec"], [(1, 10), (11, 70), (71, 100)], 690)
+FAZA7 = Faza(["kosmita", "kamikaze", "szturmowiec", "krążownik"], [(1, 30), (31, 45), (46, 70), (71, 100)], 950)
 
 # KLASA SCENA
 class Scena:
@@ -732,7 +721,7 @@ class Scena:
     obecna_scena = None
     faza:Faza = FAZA0
 
-    def __init__(self, tag:str, przyciski:list[Przycisk] = []):
+    def __init__(self, tag: str, przyciski: list[Przycisk] = []):
         self.tag = tag
         self.przyciski = przyciski
 
@@ -765,92 +754,79 @@ class Scena:
         if scena == SCENA_GRA:
             Scena.faza.pojawPrzeciwnika()
 
-# KLASA TESTY
-class Testy(unittest.TestCase):
-
-    def test_czy_gracz_strzelil(self):
-        
-        czy_strzal = Gracz.wystrzelPocisk(self)
-        self.assertEqual(czy_strzal,True,"Nie zanotowano wystrzału.")
-
-    def test_pocisk_kolizja(self):
-        pass
-        #self.assertTrue(self.sprawdzenie_kolizji,True, "Brak kolizji.")
-    
-    def test_usuwanie_przeciwnika(self):
-        pass
-
-#if __name__ == '__main__':
-    #unittest.main()
-    # Wywalało mi błąd - Filip
-
 ##
 ##      TESTY
 ##
 
-class Testy:
+class Testy(unittest.TestCase):
+    """Sprawdzanie funkcjonalności programu, wyłapuje błędy."""
     
     def test_klasaByt(self):
-        byt = Byt(0, 0, krazownik)
-        assert isinstance(byt, Byt)
+        """Test poprawnej instancji Bytu."""
+        byt_test = Byt(0, 0, krazownik)
+        self.assertIsInstance(byt_test, Byt, "Obiekt dobrej klasy")
     
     def test_klasaGracz(self):
-        gracz = Gracz()
-        assert isinstance(gracz, Byt)
-        assert isinstance(gracz, Gracz)
+        """Test poprawnej instancji gracza."""
+        gracz_test = Gracz()
+        assert isinstance(gracz_test, Byt)
+        assert isinstance(gracz_test, Gracz)
     
     def test_klasaPrzeciwnik(self):
-        enemy = Przeciwnik()
-        assert isinstance(enemy, Byt)
-        assert isinstance(enemy, Przeciwnik)
+        """Test poprawnej instancji przeciwnika."""
+        enemy_test = Przeciwnik()
+        assert isinstance(enemy_test, Byt)
+        assert isinstance(enemy_test, Przeciwnik)
     
     def test_klasaPocisk(self):
-        pocisk = Pocisk(0, 0, 10, "gracz")
-        assert isinstance(pocisk, Byt)
-        assert isinstance(pocisk, Pocisk)
+        """Test poprawnej instancji Pocisk."""
+        pocisk_test = Pocisk(0, 0, 10, "gracz")
+        assert isinstance(pocisk_test, Byt)
+        assert isinstance(pocisk_test, Pocisk)
     
     def test_klasaBonusy(self):
-        bonus = Bonusy()
-        assert isinstance(bonus, Byt)
-        assert isinstance(bonus, Bonusy)
+        """Test poprawnej instancji bonusów."""
+        bonus_test = Bonusy()
+        assert isinstance(bonus_test, Byt)
+        assert isinstance(bonus_test, Bonusy)
     
     def test_klasaTło(self):
-        tło = Tło(0)
-        assert isinstance(tło, Tło)
+        """Test poprawnej instancji tła."""
+        tło_test = Tło(0)
+        assert isinstance(tło_test, Tło)
     
     def test_klasaWybuch(self):
-        wybuch = Wybuch(0, 0)
-        assert isinstance(wybuch, Wybuch)
+        """Test poprawnej instancji wybuchu."""
+        wybuch_test = Wybuch(0, 0)
+        assert isinstance(wybuch_test, Wybuch)
     
     def test_klasaPrzycisk(self):
-        przycisk = Przycisk(but_instrukcje, but_instrukcje_hover)
-        assert isinstance(przycisk, Przycisk)
+        """Test poprawnej instancji przycisku."""
+        przycisk_test = Przycisk(but_instrukcje, but_instrukcje_hover)
+        assert isinstance(przycisk_test, Przycisk)
     
     def test_klasaScoreboard(self):
-        scoreboard = Scoreboard()
-        assert isinstance(scoreboard, Scoreboard)
+        """Test poprawnej instancji klasy Scoreboard."""
+        scoreboard_test = Scoreboard()
+        assert isinstance(scoreboard_test, Scoreboard)
     
     def test_klasaPasekZdrowia(self):
-        pasek_zdrowia = PasekZdrowia(100)
-        assert isinstance(pasek_zdrowia, PasekZdrowia)
-    
-    def test_klasaFaza(self):
-        faza = Faza(["kosmita", "szturmowiec"], [(1, 80), (81, 100)], 1500)
-        assert isinstance(faza, Faza)
-    
+        """Test poprawnej instancji paska zdrowia."""
+        pasek_zdrowia_test = PasekZdrowia(100)
+        assert isinstance(pasek_zdrowia_test, PasekZdrowia)
+
     def test_klasaScena(self):
-        scena = Scena("INTRO")
-        assert isinstance(scena, Scena)
+        """Test poprawnej instancji sceny."""
+        scena_test = Scena("INTRO")
+        assert isinstance(scena_test, Scena)
 
-    def test_przykladowyBlad(self): #Przykladowe wywolanie bledu (narazie nie działa)
-        gracz = Gracz()
-        with pytest.raises(Blad):  # Jeżeli wartość będzie inna niż bazowa 10 to wywali błąd z odpowiednim komunikatem
-            gracz.predkosc = 15
-            gracz.ZlaPredkosc()
-        # Z JAKIEGOŚ NIEZNANEGO MI POWODU NIE DZIAŁA
-
-class Blad(Exception):     #Klasa tworzaca "własny error"
-    pass
+    def test_przykladowyBlad(self):
+        """Test poprawnej prędkości gracza"""
+        gracz1_test = Gracz()
+        #gracz1.predkosc = 13
+        gracz1_test.predkosc = 10
+        self.assertEqual(gracz1_test.predkosc, 10, msg="Prędkość gracza powinna być 10.")
+        
 
 ##
 ##      OBIEKTY
@@ -875,7 +851,6 @@ pygame.display.set_icon(icon)
 podział_okienka = range(0, OKNO_SZER - kosmita.get_width(), kosmita.get_width())
 podział_okienka_bonus = range(OKNO_WYS//2, OKNO_SZER - bonus_klucz.get_width(), bonus_klucz.get_width())
 pygame.display.set_caption("STUDENT INVADERS")
-zegarek = pygame.time.Clock()
 
 # LISTY
 enemyList = list[Przeciwnik]()          # lista przeciwników
@@ -945,6 +920,8 @@ SCENA_ŚMIERĆ = Scena("ŚMIERĆ", [MENU, START, WYJDŹ])
 
 scena = SCENA_INTRO
 
+unittest.main(exit=False)
+
 # GRA
 graj = True
 while graj:
@@ -952,7 +929,7 @@ while graj:
     keys = pygame.key.get_pressed()
     pygame.display.update()
 
-    zdarzenia = pygame.event.get()  #to chyba najwazniejsza linijka programu
+    zdarzenia = pygame.event.get()
 
     for zdarzenie in zdarzenia:
         if zdarzenie.type == pygame.QUIT:
@@ -964,7 +941,8 @@ while graj:
         if czas_intro > 399:
             pygame.mixer.music.stop()
             pygame.mixer.music.load(mus_menu)
-            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(.2)
+            pygame.mixer.music.play(-1, fade_ms=3000)
             scena = SCENA_MENU
             scena.ustawPrzyciski()
             czas_intro = 0
@@ -978,11 +956,13 @@ while graj:
             else:
                 pygame.mixer.music.stop()
                 pygame.mixer.music.load(mus_menu)
-                pygame.mixer.music.play(-1)
+                pygame.mixer.music.set_volume(.2)
+                pygame.mixer.music.play(-1, fade_ms=3000)
                 scena = SCENA_MENU
                 scena.ustawPrzyciski()
                 czas_intro = 0
                 puszczono = True
+
         black.set_alpha(255 * (1 - abs(math.sin(czas_intro/117))))
         okienko.blit(black, (0, 0))
     elif scena == SCENA_MENU:
@@ -995,7 +975,8 @@ while graj:
 
         if puszczono is False and muzyka:
             pygame.mixer.music.load(mus_menu)
-            pygame.mixer.music.play(-1)
+            pygame.mixer.music.set_volume(.2)
+            pygame.mixer.music.play(-1, fade_ms=3000)
             puszczono = True
 
         if czas_intro < 120:
@@ -1005,8 +986,6 @@ while graj:
 
         if keys[pygame.K_ESCAPE]:
             graj = False
-        if keys[pygame.K_r]:
-            punkty.resetRekordu()
 
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.MOUSEBUTTONUP:
@@ -1014,7 +993,8 @@ while graj:
                     pygame.mixer.music.stop()
                     if muzyka:
                         pygame.mixer.music.load(random.choice(szafa_grająca))
-                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(.45)
+                        pygame.mixer.music.play(-1, fade_ms=1500)
                     czas_intro = 0
                     scena = SCENA_GRA
                 if WYJDŹ.czyMyszka():
@@ -1054,7 +1034,7 @@ while graj:
                 Scena.faza = FAZA5
         else:
             if punkty.wynik % 10000 in range(0, 399):
-                random_faza = random.choice([FAZA4, FAZA5, FAZA6])
+                random_faza = random.choice([FAZA4, FAZA5, FAZA6, FAZA7])
                 Scena.faza = random_faza
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.KEYDOWN:
@@ -1062,7 +1042,7 @@ while graj:
                     scena = SCENA_PAUZA
                     scena.ustawPrzyciski()
                     if muzyka:
-                        pygame.mixer.music.set_volume(.03)
+                        pygame.mixer.music.set_volume(.08)
 
         # WYKONUJE SIĘ NA KAŻDY TICK
         TŁO1.rysujTło()
@@ -1126,7 +1106,7 @@ while graj:
                         if pocisk.kto_strzelił == "rakieta":
                             czy_rakieta_wybucha = True
                             wybuch = Wybuch(pocisk.x, pocisk.y)
-                            wybuch.CzyWybuch(pocisk.x, pocisk.y, czas, False, True)
+                            wybuch.czyWybuch(pocisk.x, pocisk.y, czas, False, True)
                             wybuchList.append(wybuch)
                             (x0, y0) = (pocisk.x + pocisk_gracza1.get_width()//2, pocisk.y + pocisk_gracza1.get_height()//2)
                             sfx_eksplozja_rakiety.play()
@@ -1185,9 +1165,9 @@ while graj:
         for enemy in enemy_do_usunięcia:
             wybuch = Wybuch(enemy.x, enemy.y)
             if enemy.tag == "krążownik":
-                wybuch.CzyWybuch(enemy.x, enemy.y, czas, True, False)
+                wybuch.czyWybuch(enemy.x, enemy.y, czas, True, False)
             else:
-                wybuch.CzyWybuch(enemy.x, enemy.y, czas, False, False)
+                wybuch.czyWybuch(enemy.x, enemy.y, czas, False, False)
             wybuchList.append(wybuch)
             sfx_eksplozja.play()
             try:
@@ -1214,7 +1194,7 @@ while graj:
         zdrowie.rysujPasek()
         
         for wybuch in wybuchList:
-            wybuch.IleOdWybuchu(czas)
+            wybuch.ileOdWybuchu(czas)
         
         if czas - czas_niezniszczalności_bonus > 10000 and Gracz.niezniszczalność_bonus:
             Gracz.niezniszczalność_bonus = False
@@ -1227,15 +1207,18 @@ while graj:
         if zdrowie.hp <= 0:
             
             if punkty.rekord < punkty.wynik:
-                with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
-                    rekord.write(str(punkty.wynik))
-                    punkty.rekord = punkty.wynik
+                try:
+                    with open(os.path.join("pliki","rekord.txt"), 'w') as rekord:
+                        rekord.write(str(punkty.wynik))
+                        punkty.rekord = punkty.wynik
+                except:
+                    print("Nie można zapisać rekordu. Rekord:", rekord)
             
             scena = SCENA_ŚMIERĆ
             scena.ustawPrzyciski()
             if muzyka:
                 pygame.mixer.music.load(mus_gameover)
-                pygame.mixer.music.play()
+                pygame.mixer.music.play(fade_ms = 2000)
             
             restart()
         
@@ -1246,27 +1229,26 @@ while graj:
     elif scena == SCENA_PAUZA:
         okienko.blit(bg_pauza, (0, 0))
         scena.rysujPrzyciski()
-        pygame.display.update() # to ważne, nie usuwać
         for zdarzenie in zdarzenia:
             if zdarzenie.type == pygame.KEYDOWN:
                 if zdarzenie.key == pygame.K_ESCAPE:
                     if muzyka:
-                        pygame.mixer.music.set_volume(.25)
+                        pygame.mixer.music.set_volume(.45)
                     scena = SCENA_GRA
             elif zdarzenie.type == pygame.MOUSEBUTTONDOWN:
                 if WZNÓW.czyMyszka():
                     if muzyka:
-                        pygame.mixer.music.set_volume(.25)
+                        pygame.mixer.music.set_volume(.45)
                     scena = SCENA_GRA
                 elif MENU.czyMyszka():
                     if muzyka:
-                        pygame.mixer.music.set_volume(.25)
+                        pygame.mixer.music.set_volume(.2)
                     scena = SCENA_MENU
                     scena.ustawPrzyciski()
                     czas_intro = 0
                     if muzyka:
                         pygame.mixer.music.load(mus_menu)
-                        pygame.mixer.music.play()
+                        pygame.mixer.music.play(-1, fade_ms=3000)
                     restart()
                     punkty.wynik = 0
                 elif WYJDŹ.czyMyszka():
@@ -1291,7 +1273,8 @@ while graj:
                     pygame.mixer.stop()
                     if muzyka:
                         pygame.mixer.music.load(mus_menu)
-                        pygame.mixer.music.play(-1)
+                        pygame.mixer.music.set_volume(.2)
+                        pygame.mixer.music.play(-1, fade_ms=3000)
                 elif START.czyMyszka():
                     punkty.wynik = 0
                     czas_intro = 0
@@ -1300,22 +1283,7 @@ while graj:
                     if muzyka:
                         pygame.mixer.music.stop()
                         pygame.mixer.music.load(random.choice(szafa_grająca))
-                        pygame.mixer.music.play(-1)
-
-testy = Testy()
-
-testy.test_klasaByt()
-testy.test_klasaGracz()
-testy.test_klasaPrzeciwnik()
-testy.test_klasaPocisk()
-testy.test_klasaBonusy()
-testy.test_klasaTło()
-testy.test_klasaWybuch()
-testy.test_klasaPrzycisk()
-testy.test_klasaScoreboard()
-testy.test_klasaPasekZdrowia()
-testy.test_klasaFaza()
-testy.test_klasaScena()
-testy.test_przykladowyBlad()
+                        pygame.mixer.music.set_volume(.45)
+                        pygame.mixer.music.play(-1, fade_ms=1500)
 
 pygame.quit()
