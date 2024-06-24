@@ -58,10 +58,10 @@ bonus_rakieta = pygame.image.load(os.path.join("images","rakieta_bonus.png")).co
 bonus_przegrzanie = pygame.image.load(os.path.join("images","bonus_przegrzanie.png")).convert_alpha()
 bonus_bariera = pygame.image.load(os.path.join("images","bonus_bariera.png")).convert_alpha()
 
-icon = pygame.image.load(os.path.join("images","ic_statek.png")).convert_alpha()
-bariera = pygame.image.load(os.path.join("images","bariera.png")).convert_alpha()
-klucz = pygame.image.load(os.path.join("images","klucz_naprawczy.png")).convert_alpha()
-rakieta_icon = pygame.transform.scale(bonus_rakieta,(100,80))
+ic_gra = pygame.image.load(os.path.join("images","ic_statek.png")).convert_alpha()
+ic_bariera = pygame.image.load(os.path.join("images","bariera.png")).convert_alpha()
+ic_klucz = pygame.image.load(os.path.join("images","klucz_naprawczy.png")).convert_alpha()
+ic_rakieta = pygame.transform.scale(bonus_rakieta,(100,80))
 
 but_start = pygame.image.load(os.path.join("images","START.png")).convert_alpha()
 but_start_hover = pygame.image.load(os.path.join("images","START_aktyw.png")).convert_alpha()
@@ -321,8 +321,8 @@ class Gracz(Byt):
         
         self.szer = self.obrazek.get_width()
         self.wys = self.obrazek.get_height()
-        maska_bariery = pygame.mask.from_surface(bariera)
-        self.bariera = Byt(1200, 1200, maska_bariery, bariera)
+        maska_bariery = pygame.mask.from_surface(ic_bariera)
+        self.bariera = Byt(1200, 1200, maska_bariery, ic_bariera)
         self.dx = 0
         self.dy = 0
         self.predkosc = 10
@@ -481,7 +481,7 @@ class Scoreboard:
                 okienko.blit(font.render("NOWY REKORD: " + str(self.wynik),True,(0, 200, 0)),(0,20))
             else:
                 okienko.blit(font.render("Rekord: " + str(self.rekord),True,(255, 255, 255)),(0,20))
-            okienko.blit(rakieta_icon, (-30,40))
+            okienko.blit(ic_rakieta, (-30,40))
             okienko.blit(font.render("x " + str(Gracz.ilość_rakiet),True,(255,255,255)),(40,60))
         elif scena == SCENA_ŚMIERĆ:
             okienko.blit(font.render("Wynik: " + str(self.wynik),True,(255,255,255)),(280,170))
@@ -510,7 +510,7 @@ class PasekZdrowia:
         pygame.draw.rect(okienko, "red", (10, OKNO_WYS - 40, 260, 25))
         pygame.draw.rect(okienko, "green", (10, OKNO_WYS - 40, 260 * poziom_hp, 25))
         okienko.blit(font.render("HP",True,'green'),(140,OKNO_WYS - font.get_height() - 40))
-        okienko.blit(klucz, (247,OKNO_WYS-50))
+        okienko.blit(ic_klucz, (247,OKNO_WYS-50))
         
     def zmianaHp(self, wartosc:float):
         """Zmienia hp na zadaną wartość."""
@@ -847,7 +847,7 @@ cykl_pojawienia_pwr_up = 2
 ##           GRA           ##
 ##*************************##
 
-pygame.display.set_icon(icon)
+pygame.display.set_icon(ic_gra)
 podział_okienka = range(0, OKNO_SZER - kosmita.get_width(), kosmita.get_width())
 podział_okienka_bonus = range(OKNO_WYS//2, OKNO_SZER - bonus_klucz.get_width(), bonus_klucz.get_width())
 pygame.display.set_caption("STUDENT INVADERS")
