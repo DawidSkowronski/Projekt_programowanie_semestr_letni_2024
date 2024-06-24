@@ -2,7 +2,6 @@ import pygame
 import random
 import os
 import math
-import pytest
 import unittest
 
 pygame.init()
@@ -636,12 +635,14 @@ class Pocisk(Byt):
     def __init__(self, x: float, y: float, predkosc: float, kto_strzelił: str):
         if kto_strzelił == "gracz":
             obrazek = pocisk_gracza
+            self.czy_gracz_trafił = False
+        elif kto_strzelił == "rakieta":
+            obrazek = pocisk_gracza1
+            self.czy_gracz_trafił = False
         elif kto_strzelił == "kosmita":
             obrazek = pocisk_kosmity
         elif kto_strzelił == "krążownik":
             obrazek = pocisk_krazownika
-        elif kto_strzelił == "rakieta":
-            obrazek = pocisk_gracza1
         elif kto_strzelił == "szturmowiec":
             obrazek = pocisk_szturmowca
 
@@ -867,9 +868,10 @@ czas_goodman = 0
 czas_niezniszczalności_bonus = 0
 czas_przegrzanie_bonus = 0
 czas = 0
-enemy_do_usunięcia = []
-bonusy_do_usunięcia = []
-pociski_do_usunięcia = []
+
+enemy_do_usunięcia: list[Przeciwnik] = []
+bonusy_do_usunięcia: list[Bonusy] = []
+pociski_do_usunięcia: list[Pocisk] = []
 
 easter_egg = random.choice([True, False])
 
@@ -1040,7 +1042,7 @@ while graj:
             if punkty.wynik in (25000, 25500):
                 Scena.faza = FAZA5
         else:
-            if punkty.wynik % 10000 in range(0, 399):
+            if punkty.wynik % 10000 in range(0, 400):
                 random_faza = random.choice([FAZA4, FAZA5, FAZA6, FAZA7])
                 Scena.faza = random_faza
 
@@ -1107,6 +1109,8 @@ while graj:
             pocisk.rysujPocisk()
             if pocisk.kto_strzelił in ("gracz", "rakieta"):
                 for enemy in enemyList:
+                    if pocisk.czy_gracz_trafił:
+                        break
                     if pocisk.czyKolizja(enemy):
                         pociski_do_usunięcia.append(pocisk)
                         if pocisk.kto_strzelił == "gracz":
@@ -1118,6 +1122,7 @@ while graj:
                             wybuchList.append(wybuch)
                             (x0, y0) = (pocisk.x + pocisk_gracza1.get_width()//2, pocisk.y + pocisk_gracza1.get_height()//2)
                             sfx_eksplozja_rakiety.play()
+                        pocisk.czy_gracz_trafił = True
             if pocisk.kto_strzelił in ("kosmita", "krążownik", "kamikaze", "szturmowiec"):
                 if pocisk.czyKolizja(gracz):
                     pociski_do_usunięcia.append(pocisk)
@@ -1178,22 +1183,14 @@ while graj:
                 wybuch.czyWybuch(enemy.x, enemy.y, czas, False, False)
             wybuchList.append(wybuch)
             sfx_eksplozja.play()
-            try:
-                enemyList.remove(enemy)
-            except:
-                print("Błąd usunięcia przeciwnika.")
+            
+            enemyList.remove(enemy)
         
         for pocisk in pociski_do_usunięcia:
-            try:
-                pociskList.remove(pocisk)
-            except:
-                print("Błąd usunięcia pocisku.")
-        
+            pociskList.remove(pocisk)
+
         for bonus in bonusy_do_usunięcia:
-            try:
-                bonusList.remove(bonus)
-            except:
-                print("Błąd usunięcia bonusu.")
+            bonusList.remove(bonus)
         
         gracz.przesuńGracza()
         gracz.rysujGracza()
